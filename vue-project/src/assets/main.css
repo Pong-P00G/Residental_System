@@ -1,1 +1,96 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Archivo", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Hiragino Sans", "Yu Gothic", ui-monospace, monospace;
+
+  --color-board: #e3e7ec;
+  --color-surface: #fcfdfe;
+  --color-alt: #f3f6f9;
+  --color-ink: #0f1b26;
+  --color-ink-2: #44566a;
+  --color-ink-3: #596779;
+  --color-rule: #dbe1e7;
+  --color-rule-2: #c7cfd8;
+
+  --color-navy-900: #0e1f31;
+  --color-navy-800: #1d3557;
+  --color-navy-600: #2f5378;
+  --color-navy-300: #b9c9da;
+  --color-navy-100: #dce7f2;
+  --color-navy-50: #eef3f8;
+
+  --color-settled: #0f5f39;
+  --color-settled-bg: #e6f2eb;
+  --color-settled-bd: #b7dbc5;
+
+  --color-attention: #7e3b06;
+  --color-attention-bg: #fbf0e1;
+  --color-attention-bd: #edd2ac;
+
+  --color-signal: #8b1a11;
+  --color-signal-bg: #fbeae8;
+  --color-signal-bd: #efc0bc;
+
+  --color-progress: #2f5378;
+  --color-progress-bg: #eef3f8;
+  --color-progress-bd: #dce7f2;
+
+  --color-fyi: #44566a;
+  --color-fyi-bg: #ebeff3;
+  --color-fyi-bd: #d7dee6;
+
+  --radius-chip: 6px;
+  --radius-btn: 10px;
+  --radius-card: 12px;
+
+  --shadow-e1: 0 1px 1px rgba(15, 27, 38, 0.03), 0 4px 10px -6px rgba(15, 27, 38, 0.12);
+  --shadow-e2: 0 1px 2px rgba(15, 27, 38, 0.06), 0 22px 46px -26px rgba(15, 27, 38, 0.42);
+
+  --animate-sheet-up: sheet-up 0.22s ease-out;
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0.5;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-board font-sans text-[15px] leading-relaxed text-ink antialiased;
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  :focus-visible {
+    @apply rounded outline-2 outline-offset-2 outline-navy-800;
+  }
+  ::selection {
+    @apply bg-navy-100 text-navy-900;
+  }
+}
+
+@utility board-grid {
+  background-image:
+    linear-gradient(to right, rgba(15, 27, 38, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 27, 38, 0.055) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
