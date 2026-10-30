@@ -16,9 +16,85 @@
       rel="stylesheet"
     >
     <title>Tenure — rental management</title>
+    <style>
+      /* Pre-mount skeleton: fills the gap while Firebase restores the session. */
+      .boot-skeleton {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+        background: #e3e7ec;
+        font-family: "Archivo", system-ui, sans-serif;
+      }
+      .boot-card {
+        width: min(28rem, 100%);
+        padding: clamp(1.25rem, 4vw, 2rem);
+        border: 1px solid #dbe1e7;
+        border-radius: 16px;
+        background: #fcfdfe;
+        box-shadow: 0 1px 2px rgba(15, 27, 38, 0.06), 0 22px 46px -26px rgba(15, 27, 38, 0.42);
+      }
+      .boot-logo {
+        display: grid;
+        place-items: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border-radius: 0.5rem;
+        background: #1d3557;
+        color: #fff;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .boot-line {
+        height: 0.75rem;
+        margin-top: 0.85rem;
+        border-radius: 4px;
+        background-color: rgba(15, 27, 38, 0.055);
+        background-image: linear-gradient(90deg, transparent 0%, rgba(15, 27, 38, 0.08) 50%, transparent 100%);
+        background-size: 200% 100%;
+        animation: boot-shimmer 1.4s ease-in-out infinite;
+      }
+      .boot-line.is-title {
+        height: 1.5rem;
+        margin-top: 1.25rem;
+        width: 60%;
+      }
+      .boot-line.is-short {
+        width: 45%;
+      }
+      @keyframes boot-shimmer {
+        from { background-position: 200% 0; }
+        to { background-position: -200% 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-line { animation: none; }
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="boot-skeleton" role="status" aria-live="polite">
+        <span class="sr-only">Loading Tenure…</span>
+        <div class="boot-card">
+          <div class="boot-logo">T</div>
+          <div class="boot-line is-title"></div>
+          <div class="boot-line"></div>
+          <div class="boot-line is-short"></div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

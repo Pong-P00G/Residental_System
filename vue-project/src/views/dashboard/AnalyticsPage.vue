@@ -18,10 +18,16 @@ import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import Icon from '@/components/Icon.vue'
 import DataTable from '@/components/DataTable.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const current = collectionSeries[collectionSeries.length - 1]
+const chartSeries = computed(() =>
+  collectionSeries.map((month) => ({ label: month.label, value: month.collected, secondary: month.invoiced })),
+)
 const collectionRate = Math.round((current.collected / current.invoiced) * 100)
 const occupied = units.filter((unit) => ['Occupied', 'Notice'].includes(unit.status)).length
 const occupancyRate = Math.round((occupied / units.length) * 100)
@@ -66,7 +72,8 @@ const mix = computed(() => {
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="dashboard" />
+  <div v-else>
     <PageHeader
       eyebrow="Administration"
       title="Analytics"
@@ -119,7 +126,7 @@ const mix = computed(() => {
               <span class="font-mono text-[9.5px] uppercase tracking-[0.06em] text-ink-3">Invoiced</span>
             </div>
           </div>
-          <BarChart class="mt-5" :series="collectionSeries" :height="190" show-secondary />
+          <BarChart class="mt-5" :series="chartSeries" :height="190" show-secondary />
         </section>
 
         <section class="rounded-card border border-rule bg-surface p-5 shadow-e1">

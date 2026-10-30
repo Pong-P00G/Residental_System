@@ -22,8 +22,11 @@ import SeverityRow from '@/components/SeverityRow.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const current = computed(() => collectionSeries[collectionSeries.length - 1])
 const collectedPct = computed(() => Math.round((current.value.collected / current.value.invoiced) * 100))
@@ -32,7 +35,9 @@ const arrearsCount = computed(() => residents.filter((resident) => resident.bala
 const occupiedCount = computed(() => units.filter((unit) => ['Occupied', 'Notice'].includes(unit.status)).length)
 const occupancyPct = computed(() => Math.round((occupiedCount.value / units.length) * 100))
 const needsAction = computed(() => store.requestList.filter((request) => request.status === 'Needs action'))
-const chartSeries = computed(() => collectionSeries.map((month) => ({ ...month })))
+const chartSeries = computed(() =>
+  collectionSeries.map((month) => ({ label: month.label, value: month.collected, secondary: month.invoiced })),
+)
 
 const requestsByStatus = computed(() =>
   ['Needs action', 'Triaged', 'In progress', 'Scheduled', 'Resolved'].map((status) => ({
@@ -53,7 +58,8 @@ const recentRequests = computed(() => store.requestList.slice(0, 4))
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="dashboard" />
+  <div v-else>
     <PageHeader
       eyebrow="Halden Property Group"
       title="Dashboard"

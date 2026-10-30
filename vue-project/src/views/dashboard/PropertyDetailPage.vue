@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import {
   documents,
   money,
+  properties,
   propertyById,
   propertyRequests,
   propertyUnits,
@@ -12,17 +13,29 @@ import {
 } from '@/data/app'
 import { useAppStore } from '@/stores/app'
 import PageHeader from '@/components/PageHeader.vue'
+import MasterDetail from '@/components/MasterDetail.vue'
 import PlateDrawing from '@/components/PlateDrawing.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import MetricCard from '@/components/MetricCard.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const property = computed(() => propertyById(route.params.id))
+const masterItems = computed(() =>
+  properties.map((item) => ({
+    to: `/d/properties/${item.id}`,
+    label: item.name,
+    meta: `${item.ref} · ${item.area}`,
+    active: item.id === property.value?.id,
+  })),
+)
 const unitList = computed(() => (property.value ? propertyUnits(property.value.id) : []))
 const occupied = computed(() => unitList.value.filter((unit) => ['Occupied', 'Notice'].includes(unit.status)).length)
 const rentRoll = computed(() => unitList.value.reduce((total, unit) => total + unit.rent, 0))
@@ -55,7 +68,8 @@ const propertyChecks = computed(() => [
 </script>
 
 <template>
-  <div v-if="property">
+  <PageSkeleton v-if="loading" variant="detail" />
+  <div v-else-if="property">
     <PageHeader
       :eyebrow="`${property.ref} · Portfolio`"
       :title="property.name"
@@ -74,7 +88,8 @@ const propertyChecks = computed(() => [
       </template>
     </PageHeader>
 
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <MasterDetail label="Properties" :items="masterItems">
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <MetricCard label="Units" :value="String(unitList.length)" sub="Across all floors" />
       <MetricCard label="Occupancy" :value="`${Math.round((occupied / unitList.length) * 100)}%`" :sub="`${occupied} of ${unitList.length} let`" />
       <MetricCard label="Rent roll" :value="money(rentRoll, 0)" sub="Contracted, before fees" />
@@ -215,7 +230,8 @@ const propertyChecks = computed(() => [
           </ul>
         </section>
       </aside>
-    </div>
+      </div>
+    </MasterDetail>
   </div>
 
   <div v-else class="mx-auto max-w-lg rounded-card border border-rule bg-surface p-6 shadow-e1">

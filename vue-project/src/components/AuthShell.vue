@@ -1,6 +1,7 @@
 <script setup>
 import { org } from '@/data/app'
-import PlateDrawing from './PlateDrawing.vue'
+import PatternCrosshair from '@/assets/PatternCrosshair.vue'
+import Icon from './Icon.vue'
 
 defineProps({
   headline: { type: String, default: 'Sign in to your home.' },
@@ -9,39 +10,45 @@ defineProps({
 </script>
 
 <template>
-  <div class="grid min-h-dvh board-grid lg:grid-cols-[1.05fr_1fr]">
-    <aside class="relative hidden flex-col justify-between overflow-hidden bg-navy-900 p-10 text-white lg:flex xl:p-14">
-      <RouterLink to="/" class="flex items-center gap-3">
-        <span class="grid h-9 w-9 place-items-center rounded-lg bg-white font-mono text-[13px] font-bold text-navy-900">T</span>
-        <span class="font-mono text-[10px] font-bold tracking-[0.3em]">TENURE</span>
+  <div class="relative isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden board-grid px-4 py-10 sm:px-6">
+    <PatternCrosshair :size="56" :mark="3" color="rgba(80, 105, 135, 0.38)" />
+    <div
+      class="pointer-events-none absolute inset-x-0 top-0 h-72"
+      style="background-image: radial-gradient(80% 100% at 50% 0%, rgba(29, 53, 87, 0.09) 0%, rgba(227, 231, 236, 0) 70%)"
+    />
+
+    <div class="relative w-full max-w-110">
+      <RouterLink to="/" class="mx-auto flex w-fit items-center gap-3" aria-label="Tenure home">
+        <span class="grid h-10 w-10 place-items-center rounded-lg bg-navy-800 font-mono text-sm font-bold text-white">T</span>
+        <span class="leading-tight">
+          <span class="block font-mono text-[10px] font-bold tracking-[0.3em] text-ink">TENURE</span>
+          <span class="block text-[11.5px] text-ink-3">Resident portal</span>
+        </span>
       </RouterLink>
 
-      <div class="max-w-lg">
-        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
+      <div class="mt-7 rounded-2xl border border-rule bg-surface p-6 shadow-e2 sm:p-8">
+        <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">
           {{ org.name }} · Apartment 4B
         </p>
-        <h1 class="mt-3 text-4xl font-bold leading-[1.1] tracking-[-0.04em] xl:text-[42px]">{{ headline }}</h1>
-        <p class="mt-3 max-w-md text-sm leading-relaxed text-white/65">
+        <h1 class="mt-2 text-[26px] font-bold leading-[1.15] tracking-[-0.035em] sm:text-[28px]">{{ headline }}</h1>
+        <p class="mt-2 text-sm leading-relaxed text-ink-2">
           {{ sub || 'Pay rent, report a repair, read the building notices and keep one history of everything.' }}
         </p>
-        <div class="mt-8 overflow-hidden rounded-xl border border-white/10 bg-navy-800/40">
-          <PlateDrawing type="elevation" tint="#DCE7F2" label="4B · ELEV. S" width-label="18.4 m" />
+
+        <div class="mt-6 border-t border-rule pt-6">
+          <slot />
         </div>
       </div>
 
-      <p class="font-mono text-[10px] uppercase tracking-[0.14em] text-white/40">
-        Ledger · requests · compliance · handoff
-      </p>
-    </aside>
-
-    <main class="flex items-center justify-center px-4 py-10 sm:px-8">
-      <div class="w-full max-w-md">
-        <RouterLink to="/" class="mb-8 flex items-center gap-2 lg:hidden">
-          <span class="grid h-8 w-8 place-items-center rounded-lg bg-navy-800 font-mono text-[11px] font-bold text-white">T</span>
-          <span class="font-mono text-[10px] font-bold tracking-[0.26em] text-ink">TENURE</span>
-        </RouterLink>
-        <slot />
+      <div class="mt-5 flex flex-col items-center gap-2">
+        <p class="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink-3">
+          <Icon name="shield" :size="12" />
+          Secured by Firebase Authentication
+        </p>
+        <p class="text-center text-[10.5px] leading-relaxed text-ink-3">
+          Managed by {{ org.name }} · <a :href="org.phoneHref" class="font-medium hover:text-navy-800">{{ org.phone }}</a>
+        </p>
       </div>
-    </main>
+    </div>
   </div>
 </template>

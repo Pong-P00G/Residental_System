@@ -20,9 +20,12 @@ import Btn from '@/components/Btn.vue'
 import MetricCard from '@/components/MetricCard.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const lease = computed(() => leaseById(route.params.id))
 const unit = computed(() => (lease.value ? unitById(lease.value.unitId) : null))
@@ -43,7 +46,8 @@ const columns = [
 </script>
 
 <template>
-  <div v-if="lease">
+  <PageSkeleton v-if="loading" variant="detail" />
+  <div v-else-if="lease">
     <PageHeader
       :eyebrow="`Lease · ${lease.id}`"
       :title="tenantName"

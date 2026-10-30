@@ -7,8 +7,11 @@ import Field from '@/components/Field.vue'
 import Btn from '@/components/Btn.vue'
 import Chip from '@/components/Chip.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const tab = ref('organisation')
 const tabs = [
   { id: 'organisation', label: 'Organisation' },
@@ -66,7 +69,8 @@ const invoices = [
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="settings" />
+  <div v-else>
     <PageHeader
       eyebrow="Governance"
       title="Settings"
@@ -77,20 +81,46 @@ const invoices = [
       </template>
     </PageHeader>
 
-    <div class="grid gap-6 xl:grid-cols-[1fr_280px]">
-      <div>
-        <div class="mb-4 flex flex-wrap gap-1.5">
+    <div class="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:items-start lg:gap-6">
+      <div class="lg:sticky lg:top-28">
+        <nav
+          class="mb-4 flex gap-1.5 overflow-x-auto pb-1 no-scrollbar lg:mb-0 lg:flex-col lg:overflow-visible lg:rounded-card lg:border lg:border-rule lg:bg-surface lg:p-2 lg:shadow-e1"
+          aria-label="Settings sections"
+        >
           <button
-            v-for="item in tabs"
+            v-for="(item, index) in tabs"
             :key="item.id"
             type="button"
-            class="rounded-chip border px-3.5 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.07em] transition"
-            :class="tab === item.id ? 'border-navy-800 bg-navy-800 text-white' : 'border-rule-2 bg-surface text-ink-2 hover:border-navy-300'"
+            class="flex shrink-0 items-center gap-2 rounded-btn px-3 py-2 text-left text-[12.5px] font-medium transition lg:w-full"
+            :class="tab === item.id ? 'bg-navy-800 text-white lg:bg-navy-50 lg:text-navy-800' : 'bg-surface text-ink-2 hover:bg-alt lg:bg-transparent'"
+            :aria-current="tab === item.id ? 'true' : undefined"
             @click="tab = item.id"
           >
-            {{ item.label }}
+            <span class="font-mono text-[9px] opacity-60">0{{ index + 1 }}</span>
+            <span class="truncate">{{ item.label }}</span>
           </button>
+        </nav>
+
+        <div class="mt-3 hidden rounded-card border border-rule bg-surface p-4 shadow-e1 lg:block">
+          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-3">Workspace</p>
+          <dl class="mt-2 space-y-1.5 text-[11.5px]">
+            <div class="flex justify-between gap-3"><dt class="text-ink-3">Properties</dt><dd class="font-mono font-medium">4</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-ink-3">Units</dt><dd class="font-mono font-medium">12</dd></div>
+            <div class="flex justify-between gap-3"><dt class="text-ink-3">Staff seats</dt><dd class="font-mono font-medium">4 of 6</dd></div>
+          </dl>
         </div>
+
+        <div v-if="store.isAdmin" class="mt-3 hidden rounded-card border border-rule bg-surface p-4 shadow-e1 lg:block">
+          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-3">Admin only</p>
+          <div class="mt-2 flex flex-col gap-1.5">
+            <RouterLink to="/d/users" class="flex items-center gap-2 text-[12px] font-medium text-ink-2 hover:text-navy-800"><Icon name="user" :size="14" /> User management</RouterLink>
+            <RouterLink to="/d/audit-logs" class="flex items-center gap-2 text-[12px] font-medium text-ink-2 hover:text-navy-800"><Icon name="list" :size="14" /> Audit logs</RouterLink>
+            <RouterLink to="/d/analytics" class="flex items-center gap-2 text-[12px] font-medium text-ink-2 hover:text-navy-800"><Icon name="chart" :size="14" /> Analytics</RouterLink>
+          </div>
+        </div>
+      </div>
+
+      <div class="min-w-0">
 
         <section v-if="tab === 'organisation'" class="rounded-card border border-rule bg-surface p-5 shadow-e1">
           <h2 class="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Organisation profile</h2>
@@ -214,31 +244,6 @@ const invoices = [
         </section>
       </div>
 
-      <aside class="flex flex-col gap-4">
-        <section class="rounded-card border border-rule bg-surface p-5 shadow-e1">
-          <h2 class="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Workspace</h2>
-          <dl class="mt-3 space-y-2 text-[12px]">
-            <div class="flex justify-between gap-3"><dt class="text-ink-3">Properties</dt><dd class="font-mono font-medium">4</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-ink-3">Units</dt><dd class="font-mono font-medium">12</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-ink-3">Staff seats</dt><dd class="font-mono font-medium">4 of 6</dd></div>
-            <div class="flex justify-between gap-3"><dt class="text-ink-3">Plan</dt><dd class="font-medium">Portfolio</dd></div>
-          </dl>
-        </section>
-
-        <section class="rounded-card border border-rule bg-surface p-5 shadow-e1">
-          <h2 class="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Admin-only areas</h2>
-          <p class="mt-1.5 text-[11.5px] leading-relaxed text-ink-2">User management, audit logs and analytics are hidden from the Owner role.</p>
-          <div class="mt-3 flex flex-col gap-1.5">
-            <RouterLink to="/d/users" class="flex items-center gap-2 text-[12px] font-medium text-ink-2 hover:text-navy-800"><Icon name="user" :size="14" /> User management</RouterLink>
-            <RouterLink to="/d/audit-logs" class="flex items-center gap-2 text-[12px] font-medium text-ink-2 hover:text-navy-800"><Icon name="list" :size="14" /> Audit logs</RouterLink>
-            <RouterLink to="/d/analytics" class="flex items-center gap-2 text-[12px] font-medium text-ink-2 hover:text-navy-800"><Icon name="chart" :size="14" /> Analytics</RouterLink>
-          </div>
-        </section>
-
-        <p class="px-1 text-[11px] leading-relaxed text-ink-3">
-          Changes are recorded in the audit log with the actor, time and IP address. Billing details are never visible to residents.
-        </p>
-      </aside>
     </div>
   </div>
 </template>

@@ -8,8 +8,11 @@ import Btn from '@/components/Btn.vue'
 import SeverityRow from '@/components/SeverityRow.vue'
 import SlaBar from '@/components/SlaBar.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const filter = ref('All')
 const filters = ['All', 'Open', 'Resolved']
 
@@ -30,7 +33,8 @@ const withVendor = computed(() => store.myRequests.filter((request) => request.v
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="list" :rows="4" />
+  <div v-else>
     <PageHeader
       eyebrow="Your tenancy"
       title="My requests"

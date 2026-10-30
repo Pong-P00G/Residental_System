@@ -1,21 +1,34 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { money, org, propertyById, propertyUnits, unitStatusTone } from '@/data/app'
+import { money, org, properties, propertyById, propertyUnits, unitStatusTone } from '@/data/app'
 import PageHeader from '@/components/PageHeader.vue'
+import MasterDetail from '@/components/MasterDetail.vue'
 import PlateDrawing from '@/components/PlateDrawing.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
+const { loading } = usePageLoading()
 const property = computed(() => propertyById(route.params.id))
 const propertyUnitList = computed(() => (property.value ? propertyUnits(property.value.id) : []))
 const free = computed(() => propertyUnitList.value.filter((unit) => unit.status === 'Vacant'))
+const masterItems = computed(() =>
+  properties.map((item) => ({
+    to: `/properties/${item.id}`,
+    label: item.name,
+    meta: `${item.ref} · ${item.area}`,
+    active: item.id === property.value?.id,
+  })),
+)
 </script>
 
 <template>
-  <div v-if="property">
+  <PageSkeleton v-if="loading" variant="detail" />
+  <div v-else-if="property">
     <PageHeader
       :eyebrow="`${property.ref} · ${property.area}`"
       :title="property.name"
@@ -28,7 +41,8 @@ const free = computed(() => propertyUnitList.value.filter((unit) => unit.status 
       </template>
     </PageHeader>
 
-    <div class="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
+    <MasterDetail label="Portfolio" :items="masterItems">
+      <div class="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
       <div class="flex flex-col gap-5">
         <div class="overflow-hidden rounded-card border border-rule bg-surface shadow-e1">
           <PlateDrawing
@@ -131,7 +145,8 @@ const free = computed(() => propertyUnitList.value.filter((unit) => unit.status 
           </div>
         </section>
       </aside>
-    </div>
+      </div>
+    </MasterDetail>
   </div>
 
   <div v-else class="mx-auto max-w-lg rounded-card border border-rule bg-surface p-6 shadow-e1">

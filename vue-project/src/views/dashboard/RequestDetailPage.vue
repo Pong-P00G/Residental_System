@@ -20,9 +20,12 @@ import Sheet from '@/components/Sheet.vue'
 import SlaBar from '@/components/SlaBar.vue'
 import Timeline from '@/components/Timeline.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const request = computed(() => store.requestList.find((item) => item.id === route.params.id) || null)
 const vendor = computed(() => (request.value?.vendorId ? vendorById(request.value.vendorId) : null))
@@ -56,7 +59,8 @@ function resolve() {
 </script>
 
 <template>
-  <div v-if="request">
+  <PageSkeleton v-if="loading" variant="detail" />
+  <div v-else-if="request">
     <PageHeader
       :eyebrow="`Request · ${request.id}`"
       :title="request.title"

@@ -3,10 +3,12 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { org } from '../data/app'
 import { useAppStore } from '../stores/app'
+import { useAuthStore } from '../stores/auth'
 import Icon from '../components/Icon.vue'
 
 const route = useRoute()
 const store = useAppStore()
+const auth = useAuthStore()
 const sidebarOpen = ref(false)
 const accountOpen = ref(false)
 
@@ -137,7 +139,7 @@ onBeforeUnmount(() => {
             <span class="block truncate text-[12px] font-semibold text-white">{{ store.session.name }}</span>
             <span class="block truncate text-[10px] text-white/50">{{ store.session.role }}</span>
           </span>
-          <RouterLink to="/login" aria-label="Sign out" class="text-white/50 transition hover:text-white" @click="store.signOut()">
+          <RouterLink to="/login" aria-label="Sign out" class="text-white/50 transition hover:text-white" @click="auth.signOut()">
             <Icon name="logout" :size="16" />
           </RouterLink>
         </div>
@@ -153,7 +155,7 @@ onBeforeUnmount(() => {
       aria-modal="true"
       aria-label="Dashboard menu"
     >
-      <div class="flex h-20 items-center justify-between gap-3 border-b border-white/10 px-5">
+      <div class="flex h-16 items-center justify-between gap-3 border-b border-white/10 px-5 sm:h-20">
         <span class="flex items-center gap-3">
           <span class="grid h-9 w-9 place-items-center rounded-lg bg-white font-mono text-[13px] font-bold text-navy-900">T</span>
           <span class="font-mono text-[10px] font-bold tracking-[0.3em] text-white">TENURE</span>
@@ -187,7 +189,7 @@ onBeforeUnmount(() => {
 
     <!-- header -->
     <header class="sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur lg:ml-64">
-      <div class="flex h-20 items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6 lg:px-8">
         <button
           type="button"
           class="grid h-10 w-10 shrink-0 place-items-center rounded-btn border border-rule-2 text-ink-2 transition hover:bg-alt lg:hidden"
@@ -255,7 +257,7 @@ onBeforeUnmount(() => {
               <RouterLink to="/" class="flex items-center gap-2.5 border-t border-rule px-3 py-2 pt-2.5 text-[12.5px] font-medium text-ink-2 transition hover:bg-alt" role="menuitem">
                 <Icon name="external" :size="15" /> Resident site
               </RouterLink>
-              <RouterLink to="/login" class="flex items-center gap-2.5 px-3 pb-1.5 pt-1 text-[12.5px] font-medium text-ink-2 transition hover:bg-alt" role="menuitem" @click="store.signOut()">
+              <RouterLink to="/login" class="flex items-center gap-2.5 px-3 pb-1.5 pt-1 text-[12.5px] font-medium text-ink-2 transition hover:bg-alt" role="menuitem" @click="auth.signOut()">
                 <Icon name="logout" :size="15" /> Sign out
               </RouterLink>
             </div>

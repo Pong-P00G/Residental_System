@@ -7,8 +7,11 @@ import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import SeverityRow from '@/components/SeverityRow.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const filter = ref('All')
 const filters = ['All', 'Overdue', 'Due', 'Scheduled', 'Blocked']
 
@@ -21,7 +24,8 @@ const complianceDocs = computed(() => documents.filter((document) => ['Property'
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="list" :rows="5" />
+  <div v-else>
     <PageHeader
       eyebrow="Governance"
       title="Compliance"

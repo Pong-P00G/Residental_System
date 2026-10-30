@@ -5,8 +5,11 @@ import PageHeader from '@/components/PageHeader.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const filter = ref('All')
 const filters = ['All', 'Unread']
 
@@ -24,7 +27,8 @@ function open(item) {
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="list" :rows="5" />
+  <div v-else>
     <PageHeader
       eyebrow="Account"
       title="Notifications"

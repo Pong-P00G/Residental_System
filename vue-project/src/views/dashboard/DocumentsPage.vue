@@ -2,13 +2,17 @@
 import { computed, ref } from 'vue'
 import { documents, leaseById, propertyById, unitById } from '@/data/app'
 import { useAppStore } from '@/stores/app'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 import PageHeader from '@/components/PageHeader.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const scope = ref('All')
 const scopes = ['All', 'Portfolio', 'Property', 'Unit', 'Lease']
 
@@ -43,7 +47,8 @@ const expiring = computed(() => documents.filter((document) => ['Expiring', 'Act
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="table" :rows="6" />
+  <div v-else>
     <PageHeader
       eyebrow="Governance"
       title="Documents"
@@ -79,7 +84,7 @@ const expiring = computed(() => documents.filter((document) => ['Expiring', 'Act
       </div>
     </div>
 
-    <div class="mb-3 flex flex-wrap items-center gap-2">
+    <FilterBar variant="plain">
       <button
         v-for="option in scopes"
         :key="option"
@@ -91,7 +96,13 @@ const expiring = computed(() => documents.filter((document) => ['Expiring', 'Act
         {{ option }}
       </button>
       <span class="ml-auto font-mono text-[10.5px] uppercase tracking-[0.09em] text-ink-3">{{ rows.length }} shown</span>
-    </div>
+      <template #action>
+        <Btn size="sm" block @click="store.toast('Upload dialog opened')">
+          <Icon name="plus" :size="15" />
+          Upload document
+        </Btn>
+      </template>
+    </FilterBar>
 
     <DataTable :columns="columns" :rows="rows" min-width="980px" empty="No documents in this scope.">
       <template #cell-name="{ row }">

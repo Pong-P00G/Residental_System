@@ -45,6 +45,8 @@ import DashboardAuditLogsPage from '@/views/dashboard/AuditLogsPage.vue'
 import DashboardAnalyticsPage from '@/views/dashboard/AnalyticsPage.vue'
 
 import LoginPage from '@/views/Auth/LoginPage.vue'
+import SignupPage from '@/views/Auth/SignupPage.vue'
+import ForgotPasswordPage from '@/views/Auth/ForgotPasswordPage.vue'
 
 const customerRoutes = [
   {
@@ -176,6 +178,8 @@ const router = createRouter({
       children: dashboardRoutes.map((route) => ({ ...route, meta: { roles: ['owner', 'admin'], ...route.meta } })),
     },
     { path: '/login', name: 'login', component: LoginPage },
+    { path: '/signup', name: 'signup', component: SignupPage },
+    { path: '/forgot-password', name: 'forgot-password', component: ForgotPasswordPage },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

@@ -7,8 +7,11 @@ import PlateDrawing from '@/components/PlateDrawing.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const unit = computed(() => unitById('u-4b'))
 const lease = computed(() => leaseById('L-1004'))
 const openRequests = computed(() => store.myRequests.filter((request) => !['Resolved', 'Closed'].includes(request.status)))
@@ -16,7 +19,8 @@ const unitDocuments = computed(() => documents.filter((document) => document.sco
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="detail" />
+  <div v-else>
     <PageHeader
       eyebrow="Your tenancy"
       :title="unit.name"

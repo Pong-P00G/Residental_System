@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Archivo", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "Hiragino Sans", "Yu Gothic", ui-monospace, monospace;
@@ -62,12 +64,75 @@
 }
 
 @layer base {
+  .dark {
+    color-scheme: dark;
+    --color-board: #0a121a;
+    --color-surface: #101c27;
+    --color-alt: #16242f;
+    --color-ink: #e8eff5;
+    --color-ink-2: #a7b8c7;
+    --color-ink-3: #8498aa;
+    --color-rule: #21313d;
+    --color-rule-2: #2c4050;
+
+    --color-navy-900: #050c13;
+    --color-navy-800: #4a7ba7;
+    --color-navy-600: #8fb8da;
+    --color-navy-300: #3a5368;
+    --color-navy-100: #1b3042;
+    --color-navy-50: #142534;
+
+    --color-settled: #7fd4a4;
+    --color-settled-bg: #0f2b1e;
+    --color-settled-bd: #235139;
+
+    --color-attention: #f0b475;
+    --color-attention-bg: #2c1f10;
+    --color-attention-bd: #4d381d;
+
+    --color-signal: #f39a90;
+    --color-signal-bg: #2e1613;
+    --color-signal-bd: #512a25;
+
+    --color-progress: #8fb8da;
+    --color-progress-bg: #142534;
+    --color-progress-bd: #24405a;
+
+    --color-fyi: #a7b8c7;
+    --color-fyi-bg: #18242f;
+    --color-fyi-bd: #293a47;
+
+    --shadow-e1: 0 1px 1px rgba(0, 0, 0, 0.4), 0 4px 12px -6px rgba(0, 0, 0, 0.6);
+    --shadow-e2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 22px 46px -26px rgba(0, 0, 0, 0.8);
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    /* Keep stray oversized elements from producing a sideways page.
+       `clip` (not `hidden`) avoids turning the page into a scroll
+       container, so position: sticky keeps working. */
+    overflow-x: hidden;
+    overflow-x: clip;
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    @media (prefers-reduced-motion: reduce) {
+      scroll-behavior: auto;
+    }
   }
   body {
     @apply bg-board font-sans text-[15px] leading-relaxed text-ink antialiased;
+    /* Same guard as the root: keep oversized children from producing a
+       sideways page. `clip` keeps position: sticky working. */
+    overflow-x: hidden;
+    overflow-x: clip;
+    overflow-wrap: break-word;
+  }
+  img,
+  svg,
+  video,
+  canvas {
+    max-width: 100%;
   }
   button,
   [role="button"] {
@@ -78,6 +143,37 @@
   }
   ::selection {
     @apply bg-navy-100 text-navy-900;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@utility skeleton {
+  --skeleton-base: rgba(15, 27, 38, 0.055);
+  --skeleton-sheen: rgba(15, 27, 38, 0.075);
+  background-color: var(--skeleton-base);
+  background-image: linear-gradient(90deg, transparent 0%, var(--skeleton-sheen) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+
+  /* The ink tints disappear against a dark board, so flip to light tints
+     and keep the sheen slightly stronger than the base. */
+  &:where(.dark, .dark *) {
+    --skeleton-base: rgba(232, 239, 245, 0.07);
+    --skeleton-sheen: rgba(232, 239, 245, 0.14);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    /* A frozen sweep reads as a gradient artefact; a flat block reads as loading. */
+    background-image: none;
   }
 }
 

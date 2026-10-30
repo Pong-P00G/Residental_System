@@ -2,13 +2,17 @@
 import { computed, ref } from 'vue'
 import { leaseStatusTone, leases, money, propertyById, residentById, unitById } from '@/data/app'
 import { useAppStore } from '@/stores/app'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 import PageHeader from '@/components/PageHeader.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const filter = ref('All')
 const filters = ['All', 'Active', 'Expiring', 'Pending signature', 'In arrears']
 
@@ -48,7 +52,8 @@ const contractValue = computed(() => leases.filter((lease) => lease.status !== '
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="table" :rows="6" />
+  <div v-else>
     <PageHeader
       eyebrow="Portfolio"
       title="Leases"
@@ -85,7 +90,7 @@ const contractValue = computed(() => leases.filter((lease) => lease.status !== '
       </div>
     </div>
 
-    <div class="mb-3 flex flex-wrap items-center gap-2">
+    <FilterBar variant="plain">
       <button
         v-for="option in filters"
         :key="option"
@@ -97,7 +102,13 @@ const contractValue = computed(() => leases.filter((lease) => lease.status !== '
         {{ option }}
       </button>
       <span class="ml-auto font-mono text-[10.5px] uppercase tracking-[0.09em] text-ink-3">{{ rows.length }} shown</span>
-    </div>
+      <template #action>
+        <Btn size="sm" block @click="store.toast('New lease form opened')">
+          <Icon name="plus" :size="15" />
+          New lease
+        </Btn>
+      </template>
+    </FilterBar>
 
     <DataTable :columns="columns" :rows="rows" min-width="1040px" empty="No leases match this filter.">
       <template #cell-id="{ row }">

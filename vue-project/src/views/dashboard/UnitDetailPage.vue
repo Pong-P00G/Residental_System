@@ -21,9 +21,12 @@ import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import MetricCard from '@/components/MetricCard.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const unit = computed(() => unitById(route.params.id))
 const property = computed(() => (unit.value ? propertyById(unit.value.propertyId) : null))
@@ -37,7 +40,8 @@ const debit = computed(() => unitPayments.value.reduce((total, entry) => total +
 </script>
 
 <template>
-  <div v-if="unit && property">
+  <PageSkeleton v-if="loading" variant="detail" />
+  <div v-else-if="unit && property">
     <PageHeader
       :eyebrow="`${property.name} · ${unit.label}`"
       :title="unit.name"

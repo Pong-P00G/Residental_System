@@ -3,13 +3,17 @@ import { computed, ref } from 'vue'
 import { staff } from '@/data/app'
 import { useAppStore } from '@/stores/app'
 import PageHeader from '@/components/PageHeader.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import Field from '@/components/Field.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const query = ref('')
 const role = ref('All')
 const roles = ['All', 'Admin', 'Owner', 'Manager', 'Resident']
@@ -35,7 +39,8 @@ const statusTone = (value) => (value === 'Active' ? 'ok' : 'crit')
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="table" :rows="6" />
+  <div v-else>
     <PageHeader
       eyebrow="Administration"
       title="User management"
@@ -73,7 +78,7 @@ const statusTone = (value) => (value === 'Active' ? 'ok' : 'crit')
       </div>
     </div>
 
-    <div class="mb-3 flex flex-col gap-3 rounded-card border border-rule bg-surface p-4 shadow-e1 lg:flex-row lg:items-center">
+    <FilterBar>
       <div class="lg:w-80">
         <Field v-model="query" search placeholder="Name or email" />
       </div>
@@ -90,7 +95,13 @@ const statusTone = (value) => (value === 'Active' ? 'ok' : 'crit')
         </button>
       </div>
       <span class="font-mono text-[10.5px] uppercase tracking-[0.09em] text-ink-3">{{ rows.length }} shown</span>
-    </div>
+      <template #action>
+        <Btn size="sm" block @click="store.toast('Invite user form opened')">
+          <Icon name="plus" :size="15" />
+          Invite user
+        </Btn>
+      </template>
+    </FilterBar>
 
     <DataTable :columns="columns" :rows="rows" min-width="860px" empty="No users match this filter.">
       <template #cell-name="{ row }">

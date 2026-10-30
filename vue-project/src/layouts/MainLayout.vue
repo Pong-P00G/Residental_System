@@ -3,12 +3,15 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { org, resident } from '../data/app'
 import { useAppStore } from '../stores/app'
+import { useAuthStore } from '../stores/auth'
+import { preferences } from '../lib/preferences'
 import Icon from '../components/Icon.vue'
 import PatternFineGrid from '../assets/PatternFineGrid.vue'
 
 const route = useRoute()
 const router = useRouter()
 const store = useAppStore()
+const auth = useAuthStore()
 const menuOpen = ref(false)
 const accountOpen = ref(false)
 const searchTerm = ref('')
@@ -90,7 +93,7 @@ onBeforeUnmount(() => {
       class="sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur transition-shadow"
       :class="scrolled ? 'shadow-e1' : ''"
     >
-      <div class="mx-auto flex h-20 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6 lg:px-8">
         <RouterLink to="/" class="flex shrink-0 items-center gap-3" aria-label="Tenure home">
           <span class="grid h-10 w-10 place-items-center rounded-lg bg-navy-800 font-mono text-sm font-bold text-white">T</span>
           <span class="leading-tight">
@@ -127,7 +130,7 @@ onBeforeUnmount(() => {
           >
             <Icon name="bell" :size="20" />
             <span
-              v-if="store.unreadCount"
+              v-if="store.unreadCount && preferences.notifications !== 'muted'"
               class="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-signal px-1 font-mono text-[9px] font-semibold leading-none text-white"
             >
               {{ store.unreadCount }}
@@ -178,14 +181,14 @@ onBeforeUnmount(() => {
               <RouterLink to="/notifications" class="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-ink-2 transition hover:bg-alt hover:text-ink" role="menuitem">
                 <Icon name="bell" :size="16" />
                 <span class="flex-1">Notifications</span>
-                <span v-if="store.unreadCount" class="rounded-full bg-signal px-1.5 py-0.5 font-mono text-[9px] font-semibold leading-none text-white">
+                <span v-if="store.unreadCount && preferences.notifications !== 'muted'" class="rounded-full bg-signal px-1.5 py-0.5 font-mono text-[9px] font-semibold leading-none text-white">
                   {{ store.unreadCount }}
                 </span>
               </RouterLink>
               <RouterLink to="/support" class="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-ink-2 transition hover:bg-alt hover:text-ink" role="menuitem">
                 <Icon name="message" :size="16" /> Support
               </RouterLink>
-              <RouterLink to="/login" class="flex items-center gap-2.5 border-t border-rule px-3 pb-1.5 pt-2.5 text-[13px] font-medium text-ink-2 transition hover:bg-alt hover:text-ink" role="menuitem" @click="store.signOut()">
+              <RouterLink to="/login" class="flex items-center gap-2.5 border-t border-rule px-3 pb-1.5 pt-2.5 text-[13px] font-medium text-ink-2 transition hover:bg-alt hover:text-ink" role="menuitem" @click="auth.signOut()">
                 <Icon name="logout" :size="16" /> Sign out
               </RouterLink>
             </div>
@@ -271,10 +274,10 @@ onBeforeUnmount(() => {
           <RouterLink to="/profile" class="rounded-btn px-3 py-2.5 text-sm font-medium text-ink-2 transition hover:bg-alt">Profile</RouterLink>
           <RouterLink to="/notifications" class="flex items-center gap-2 rounded-btn px-3 py-2.5 text-sm font-medium text-ink-2 transition hover:bg-alt">
             Notifications
-            <span v-if="store.unreadCount" class="rounded-full bg-signal px-1.5 py-0.5 font-mono text-[9px] font-semibold text-white">{{ store.unreadCount }}</span>
+            <span v-if="store.unreadCount && preferences.notifications !== 'muted'" class="rounded-full bg-signal px-1.5 py-0.5 font-mono text-[9px] font-semibold text-white">{{ store.unreadCount }}</span>
           </RouterLink>
           <RouterLink v-if="store.canManage" to="/dashboard" class="rounded-btn px-3 py-2.5 text-sm font-medium text-ink-2 transition hover:bg-alt">Manager dashboard</RouterLink>
-          <RouterLink to="/login" class="rounded-btn px-3 py-2.5 text-sm font-medium text-ink-2 transition hover:bg-alt" @click="store.signOut()">Sign out</RouterLink>
+          <RouterLink to="/login" class="rounded-btn px-3 py-2.5 text-sm font-medium text-ink-2 transition hover:bg-alt" @click="auth.signOut()">Sign out</RouterLink>
         </template>
         <RouterLink v-else to="/login" class="flex items-center justify-center gap-2 rounded-btn bg-navy-800 px-3 py-2.5 text-sm font-semibold text-white">
           <Icon name="user" :size="16" /> Sign in to your tenancy
@@ -282,7 +285,7 @@ onBeforeUnmount(() => {
       </nav>
     </aside>
 
-    <main id="main-content" class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <main id="main-content" class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
       <RouterView />
     </main>
 

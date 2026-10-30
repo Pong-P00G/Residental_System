@@ -7,8 +7,11 @@ import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import Icon from '@/components/Icon.vue'
 import DataTable from '@/components/DataTable.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const columns = [
   { key: 'name', label: 'Property' },
@@ -38,7 +41,8 @@ const rows = computed(() =>
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="table" :rows="5" />
+  <div v-else>
     <PageHeader
       eyebrow="Portfolio"
       title="Properties"

@@ -3,13 +3,17 @@ import { computed, ref } from 'vue'
 import { money, propertyById, residentById, unitStatusTone, units } from '@/data/app'
 import { useAppStore } from '@/stores/app'
 import PageHeader from '@/components/PageHeader.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import Field from '@/components/Field.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const query = ref('')
 const status = ref('All')
 const statuses = ['All', 'Occupied', 'Vacant', 'Notice', 'Maintenance']
@@ -54,7 +58,8 @@ const counts = computed(() => ({
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="table" :rows="7" />
+  <div v-else>
     <PageHeader
       eyebrow="Portfolio"
       title="Units"
@@ -68,7 +73,7 @@ const counts = computed(() => ({
       </template>
     </PageHeader>
 
-    <div class="mb-5 flex flex-col gap-3 rounded-card border border-rule bg-surface p-4 shadow-e1 lg:flex-row lg:items-center">
+    <FilterBar>
       <div class="lg:w-80">
         <Field v-model="query" search placeholder="Unit, property, resident" />
       </div>
@@ -85,7 +90,13 @@ const counts = computed(() => ({
         </button>
       </div>
       <span class="font-mono text-[10.5px] uppercase tracking-[0.09em] text-ink-3">{{ rows.length }} shown</span>
-    </div>
+      <template #action>
+        <Btn size="sm" block @click="store.toast('Add unit form opened')">
+          <Icon name="plus" :size="15" />
+          Add unit
+        </Btn>
+      </template>
+    </FilterBar>
 
     <DataTable :columns="columns" :rows="rows" min-width="960px" empty="No units match these filters.">
       <template #cell-unit="{ row }">

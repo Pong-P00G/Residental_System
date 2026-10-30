@@ -19,9 +19,12 @@ import Btn from '@/components/Btn.vue'
 import MetricCard from '@/components/MetricCard.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const route = useRoute()
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const resident = computed(() => residentById(route.params.id))
 const unit = computed(() => (resident.value ? unitById(resident.value.unitId) : null))
@@ -42,7 +45,8 @@ const columns = [
 </script>
 
 <template>
-  <div v-if="resident">
+  <PageSkeleton v-if="loading" variant="detail" />
+  <div v-else-if="resident">
     <PageHeader
       :eyebrow="`Resident · ${unit ? unit.label : 'No unit'}`"
       :title="resident.name"

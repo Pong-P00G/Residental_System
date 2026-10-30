@@ -80,6 +80,13 @@ export const useAppStore = defineStore('app', {
     persistSession() {
       saveSession(this)
     },
+    applyAuthSession({ name, email }) {
+      this.signedIn = true
+      this.role = 'resident'
+      this.session = { ...accounts.resident, name: name || accounts.resident.name, email: email || '' }
+      this.profile = { ...accounts.resident, name: name || accounts.resident.name, email: email || '' }
+      this.persistSession()
+    },
     signIn(role = 'resident') {
       const next = ROLES.includes(role) ? role : 'resident'
       this.signedIn = true

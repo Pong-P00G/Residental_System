@@ -2,13 +2,17 @@
 import { computed, ref } from 'vue'
 import { ledger, money } from '@/data/app'
 import { useAppStore } from '@/stores/app'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 import PageHeader from '@/components/PageHeader.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const filter = ref('All')
 const filters = ['All', ...new Set(ledger.map((entry) => entry.category))]
 
@@ -39,7 +43,8 @@ const totalOut = computed(() => ledger.reduce((total, entry) => total + entry.de
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="table" :rows="8" />
+  <div v-else>
     <PageHeader
       eyebrow="Operations"
       title="Financial ledger"
@@ -80,7 +85,7 @@ const totalOut = computed(() => ledger.reduce((total, entry) => total + entry.de
       </div>
     </div>
 
-    <div class="mb-3 flex flex-wrap items-center gap-2">
+    <FilterBar variant="plain">
       <button
         v-for="option in filters"
         :key="option"
@@ -92,7 +97,13 @@ const totalOut = computed(() => ledger.reduce((total, entry) => total + entry.de
         {{ option }}
       </button>
       <span class="ml-auto font-mono text-[10.5px] uppercase tracking-[0.09em] text-ink-3">{{ rows.length }} entries</span>
-    </div>
+      <template #action>
+        <Btn size="sm" block @click="store.toast('Reconciliation started')">
+          <Icon name="scale" :size="15" />
+          Reconcile
+        </Btn>
+      </template>
+    </FilterBar>
 
     <DataTable :columns="columns" :rows="rows" min-width="960px" empty="No ledger entries in this category.">
       <template #cell-date="{ row }"><span class="text-[11.5px]">{{ row.date }}</span></template>

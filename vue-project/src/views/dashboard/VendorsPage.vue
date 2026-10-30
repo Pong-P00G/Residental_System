@@ -6,8 +6,11 @@ import PageHeader from '@/components/PageHeader.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
 import Icon from '@/components/Icon.vue'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 
 const totalSpend = computed(() => vendors.reduce((total, vendor) => total + vendor.spendYtd, 0))
 const avgRating = computed(() => (vendors.reduce((total, vendor) => total + vendor.rating, 0) / vendors.length).toFixed(1))
@@ -17,7 +20,8 @@ const statusTone = (status) => ({ Preferred: 'ok', Active: 'neutral', 'Under rev
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="cards" :cards="6" />
+  <div v-else>
     <PageHeader
       eyebrow="Operations"
       title="Vendors"
@@ -53,7 +57,7 @@ const statusTone = (status) => ({ Preferred: 'ok', Active: 'neutral', 'Under rev
       <section v-for="vendor in vendors" :key="vendor.id" class="flex flex-col rounded-card border border-rule bg-surface p-5 shadow-e1">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.1em] text-ink-3">{{ vendor.trade }}</p>
+            <p class="font-mono text-[9.5px] font-semibold uppercase tracking-widest text-ink-3">{{ vendor.trade }}</p>
             <h2 class="mt-0.5 text-[15px] font-semibold tracking-[-0.02em]">{{ vendor.name }}</h2>
             <p class="mt-0.5 text-[11px] text-ink-3">{{ vendor.contact }}</p>
           </div>

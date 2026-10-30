@@ -11,22 +11,13 @@ const available = computed(() => units.filter((unit) => unit.status === 'Vacant'
 const rentFrom = computed(() => Math.min(...units.map((unit) => unit.rent)))
 const featured = computed(() => properties.slice(0, 3))
 
-const steps = [
-  {
-    title: 'Find the home',
-    body: 'Every property and unit is documented — rent, fees, floor area, condition and the exact date it is free.',
-    icon: 'search',
-  },
-  {
-    title: 'Ask, view, sign',
-    body: 'Request a viewing, meet the manager and sign the tenancy. One reference number follows you through.',
-    icon: 'key',
-  },
-  {
-    title: 'Live in it',
-    body: 'Pay rent, report repairs, renew the lease and keep every document in one place after you move in.',
-    icon: 'home',
-  },
+const features = [
+  { title: 'Rent & statements', body: 'One statement per period, every payment receipted, nothing hidden in a fee line.', icon: 'wallet' },
+  { title: 'Repairs with a clock', body: 'Report a fault, watch the response window, and see the named vendor attending.', icon: 'wrench' },
+  { title: 'Lease & documents', body: 'Signed agreements, certificates and surveys filed against the record they belong to.', icon: 'file' },
+  { title: 'Building notices', body: 'Shut-offs, inspections and works announced once — not in a group chat.', icon: 'bell' },
+  { title: 'Compliance calendar', body: 'Gas, fire and electrical dates tracked before they become a legal problem.', icon: 'shield' },
+  { title: 'One history', body: 'Every rent change, repair and notice kept in order for the whole tenancy.', icon: 'clock' },
 ]
 </script>
 
@@ -129,19 +120,27 @@ const steps = [
       </div>
     </section>
 
-    <section class="mt-14 rounded-card border border-rule bg-surface p-6 shadow-e1 sm:p-8">
-      <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">How it works</p>
-      <div class="mt-5 grid gap-6 sm:grid-cols-3">
-        <div v-for="(step, index) in steps" :key="step.title" class="flex gap-3.5">
-          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-navy-100 bg-navy-50 text-navy-800">
-            <Icon :name="step.icon" :size="17" />
+    <section class="mt-14">
+      <div class="max-w-2xl">
+        <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">The record</p>
+        <h2 class="mt-1 text-2xl font-bold tracking-[-0.03em]">Six systems, one tenancy record</h2>
+        <p class="mt-2 text-sm leading-relaxed text-ink-2">
+          Everything a home needs day to day, kept in the same place instead of spread across email, spreadsheets and
+          a filing cabinet.
+        </p>
+      </div>
+      <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <article
+          v-for="feature in features"
+          :key="feature.title"
+          class="rounded-card border border-rule bg-surface p-5 shadow-e1 transition hover:border-navy-300 hover:shadow-e2"
+        >
+          <span class="grid h-10 w-10 place-items-center rounded-lg border border-navy-100 bg-navy-50 text-navy-800">
+            <Icon :name="feature.icon" :size="18" />
           </span>
-          <div>
-            <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.12em] text-ink-3">Step {{ index + 1 }}</p>
-            <h3 class="mt-0.5 text-sm font-semibold">{{ step.title }}</h3>
-            <p class="mt-1 text-[12.5px] leading-relaxed text-ink-2">{{ step.body }}</p>
-          </div>
-        </div>
+          <h3 class="mt-3 text-[14px] font-semibold tracking-[-0.01em]">{{ feature.title }}</h3>
+          <p class="mt-1 text-[12.5px] leading-relaxed text-ink-2">{{ feature.body }}</p>
+        </article>
       </div>
     </section>
 

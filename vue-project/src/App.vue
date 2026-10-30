@@ -1,9 +1,5 @@
 <script setup>
 import ToastHost from './components/ToastHost.vue'
-// import { useAuthStore } from './stores/app'
-// const authStore = useAuthStore()
-
-
 </script>
 
 <template>

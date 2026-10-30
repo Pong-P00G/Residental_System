@@ -2,7 +2,10 @@
 import { computed, ref } from 'vue'
 import { auditLogs } from '@/data/app'
 import { useAppStore } from '@/stores/app'
+import PageSkeleton from '@/components/PageSkeleton.vue'
+import { usePageLoading } from '@/composables/usePageLoading'
 import PageHeader from '@/components/PageHeader.vue'
+import FilterBar from '@/components/FilterBar.vue'
 import Field from '@/components/Field.vue'
 import Chip from '@/components/Chip.vue'
 import Btn from '@/components/Btn.vue'
@@ -10,6 +13,7 @@ import DataTable from '@/components/DataTable.vue'
 import Icon from '@/components/Icon.vue'
 
 const store = useAppStore()
+const { loading } = usePageLoading()
 const query = ref('')
 const result = ref('All')
 const results = ['All', 'Success', 'Blocked']
@@ -35,7 +39,8 @@ const blocked = computed(() => auditLogs.filter((entry) => entry.result === 'Blo
 </script>
 
 <template>
-  <div>
+  <PageSkeleton v-if="loading" variant="table" :rows="8" />
+  <div v-else>
     <PageHeader
       eyebrow="Administration"
       title="Audit logs"
@@ -68,7 +73,7 @@ const blocked = computed(() => auditLogs.filter((entry) => entry.result === 'Blo
       </div>
     </div>
 
-    <div class="mb-3 flex flex-col gap-3 rounded-card border border-rule bg-surface p-4 shadow-e1 lg:flex-row lg:items-center">
+    <FilterBar>
       <div class="lg:w-80">
         <Field v-model="query" search placeholder="Actor, action, target or IP" />
       </div>
@@ -93,7 +98,13 @@ const blocked = computed(() => auditLogs.filter((entry) => entry.result === 'Blo
         </button>
       </div>
       <span class="font-mono text-[10.5px] uppercase tracking-[0.09em] text-ink-3">{{ rows.length }} shown</span>
-    </div>
+      <template #action>
+        <Btn size="sm" block variant="ghost" @click="store.toast('Audit log exported as CSV')">
+          <Icon name="download" :size="15" />
+          Export log
+        </Btn>
+      </template>
+    </FilterBar>
 
     <DataTable :columns="columns" :rows="rows" min-width="900px" empty="No audit entries match this filter.">
       <template #cell-at="{ row }"><span class="whitespace-nowrap text-[11.5px]">{{ row.at }}</span></template>

@@ -4,8 +4,19 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import { initPreferences } from './lib/preferences'
+import { useAuthStore } from './stores/auth'
 
-createApp(App)
-.use(createPinia())
-.use(router)
-.mount('#app')
+initPreferences()
+
+const app = createApp(App)
+const pinia = createPinia()
+
+app.use(pinia)
+
+const auth = useAuthStore(pinia)
+
+auth.initAuth().finally(() => {
+  app.use(router)
+  app.mount('#app')
+})
