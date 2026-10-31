@@ -11,65 +11,147 @@
     >
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Khmer&display=swap" rel="stylesheet">
     <title>Tenure — rental management</title>
     <style>
-      /* Pre-mount skeleton: fills the gap while Firebase restores the session. */
+      :root {
+        --boot-surface: #fcfdfe;
+        --boot-alt: #f3f6f9;
+        --boot-rule: #dbe1e7;
+        --boot-block: rgba(15, 27, 38, 0.055);
+        --boot-sheen: rgba(15, 27, 38, 0.08);
+        --boot-navy: #1d3557;
+        --boot-pill: rgba(224, 242, 254, 0.6);
+        --boot-shadow: 0 1px 1px rgba(15, 27, 38, 0.03), 0 4px 10px -6px rgba(15, 27, 38, 0.12);
+      }
+      html.dark {
+        --boot-surface: #101c27;
+        --boot-alt: #16242f;
+        --boot-rule: #21313d;
+        --boot-block: rgba(232, 239, 245, 0.07);
+        --boot-sheen: rgba(232, 239, 245, 0.14);
+        --boot-navy: #4a7ba7;
+        --boot-pill: rgba(142, 184, 218, 0.14);
+        --boot-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 4px 12px -6px rgba(0, 0, 0, 0.6);
+      }
+
       .boot-skeleton {
         min-height: 100dvh;
-        display: grid;
-        place-items: center;
-        padding: 1.5rem;
-        background: #e3e7ec;
+        background: var(--boot-surface);
         font-family: "Archivo", system-ui, sans-serif;
+        color-scheme: light;
       }
-      .boot-card {
-        width: min(28rem, 100%);
-        padding: clamp(1.25rem, 4vw, 2rem);
-        border: 1px solid #dbe1e7;
-        border-radius: 16px;
-        background: #fcfdfe;
-        box-shadow: 0 1px 2px rgba(15, 27, 38, 0.06), 0 22px 46px -26px rgba(15, 27, 38, 0.42);
+
+      /* shared shimmer block */
+      .boot-block {
+        background-color: var(--boot-block);
+        background-image: linear-gradient(90deg, transparent 0%, var(--boot-sheen) 50%, transparent 100%);
+        background-size: 200% 100%;
+        animation: boot-shimmer 1.5s ease-in-out infinite;
+        border-radius: 4px;
       }
+
+      /* header */
+      .boot-header {
+        border-bottom: 1px solid var(--boot-rule);
+        background: var(--boot-surface);
+      }
+      .boot-header-inner {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        max-width: 80rem;
+        height: 4rem;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+      .boot-brand { display: flex; align-items: center; gap: 0.75rem; }
       .boot-logo {
         display: grid;
         place-items: center;
-        width: 2.25rem;
-        height: 2.25rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        flex-shrink: 0;
         border-radius: 0.5rem;
-        background: #1d3557;
+        background: var(--boot-navy);
         color: #fff;
         font-family: "IBM Plex Mono", monospace;
         font-size: 0.8rem;
         font-weight: 700;
       }
-      .boot-line {
-        height: 0.75rem;
-        margin-top: 0.85rem;
-        border-radius: 4px;
-        background-color: rgba(15, 27, 38, 0.055);
-        background-image: linear-gradient(90deg, transparent 0%, rgba(15, 27, 38, 0.08) 50%, transparent 100%);
-        background-size: 200% 100%;
-        animation: boot-shimmer 1.4s ease-in-out infinite;
+      .boot-brand-text { display: flex; flex-direction: column; gap: 0.4rem; }
+      .boot-wordmark { width: 3.75rem; height: 0.6rem; }
+      .boot-caption { width: 5rem; height: 0.45rem; }
+
+      .boot-nav {
+        display: none;
+        align-items: center;
+        gap: 0.25rem;
+        margin-left: 1.5rem;
+        padding: 0.5rem;
+        border-radius: 1.5rem;
+        background: var(--boot-pill);
       }
-      .boot-line.is-title {
-        height: 1.5rem;
-        margin-top: 1.25rem;
-        width: 60%;
+      .boot-nav-pill { width: 3.5rem; height: 1.9rem; border-radius: 1rem; }
+      .boot-nav-pill.is-active { background-image: none; background-color: var(--boot-navy); opacity: 0.35; }
+
+      .boot-actions { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
+      .boot-bell { width: 1rem; height: 1rem; border-radius: 999px; }
+      .boot-avatar { width: 2rem; height: 2rem; border-radius: 999px; }
+
+      /* main content */
+      .boot-main {
+        width: 100%;
+        max-width: 80rem;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 3rem;
       }
-      .boot-line.is-short {
-        width: 45%;
+      .boot-eyebrow { width: 7rem; height: 0.6rem; }
+      .boot-title { width: min(18rem, 70%); height: 1.6rem; margin-top: 0.75rem; }
+      .boot-sub { width: min(26rem, 100%); height: 0.7rem; margin-top: 0.6rem; }
+      .boot-sub.is-short { width: min(17rem, 70%); }
+
+      .boot-grid {
+        display: grid;
+        gap: 1.25rem;
+        margin-top: 1.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
       }
+      .boot-card {
+        overflow: hidden;
+        border: 1px solid var(--boot-rule);
+        border-radius: 12px;
+        background: var(--boot-surface);
+        box-shadow: var(--boot-shadow);
+      }
+      .boot-thumb { height: 8rem; border-radius: 0; background-color: var(--boot-alt); }
+      .boot-card-body { padding: 1rem; }
+      .boot-card-title { width: 65%; height: 0.8rem; }
+      .boot-card-meta { width: 45%; height: 0.6rem; margin-top: 0.55rem; }
+      .boot-chips { display: flex; gap: 0.4rem; margin-top: 1rem; }
+      .boot-chip { width: 3.5rem; height: 1.2rem; border-radius: 6px; }
+
       @keyframes boot-shimmer {
         from { background-position: 200% 0; }
         to { background-position: -200% 0; }
       }
-      @media (prefers-reduced-motion: reduce) {
-        .boot-line { animation: none; }
+
+      @media (min-width: 640px) {
+        .boot-header-inner { height: 5rem; padding: 0 1.5rem; }
+        .boot-main { padding: 2rem 1.5rem 4rem; }
       }
+      @media (min-width: 1024px) {
+        .boot-nav { display: flex; }
+        .boot-header-inner { padding: 0 2rem; }
+        .boot-main { padding: 3rem 2rem 4rem; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .boot-block { animation: none; background-image: none; }
+      }
+
       .sr-only {
         position: absolute;
         width: 1px;
@@ -81,18 +163,85 @@
         white-space: nowrap;
         border: 0;
       }
+
+      .khmer-regular {
+        font-family: "Khmer", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+      }
     </style>
   </head>
   <body>
     <div id="app">
-      <div class="boot-skeleton" role="status" aria-live="polite">
+      <div class="boot-skeleton" role="status" aria-live="polite" aria-busy="true">
         <span class="sr-only">Loading Tenure…</span>
-        <div class="boot-card">
-          <div class="boot-logo">T</div>
-          <div class="boot-line is-title"></div>
-          <div class="boot-line"></div>
-          <div class="boot-line is-short"></div>
-        </div>
+
+        <header class="boot-header">
+          <div class="boot-header-inner">
+            <div class="boot-brand">
+              <div class="boot-logo">T</div>
+              <div class="boot-brand-text">
+                <div class="boot-block boot-wordmark"></div>
+                <div class="boot-block boot-caption"></div>
+              </div>
+            </div>
+
+            <div class="boot-nav" aria-hidden="true">
+              <div class="boot-block boot-nav-pill is-active"></div>
+              <div class="boot-block boot-nav-pill"></div>
+              <div class="boot-block boot-nav-pill"></div>
+              <div class="boot-block boot-nav-pill"></div>
+            </div>
+
+            <div class="boot-actions">
+              <div class="boot-block boot-bell"></div>
+              <div class="boot-block boot-avatar"></div>
+            </div>
+          </div>
+        </header>
+
+        <main class="boot-main">
+          <div class="boot-block boot-eyebrow"></div>
+          <div class="boot-block boot-title"></div>
+          <div class="boot-block boot-sub"></div>
+          <div class="boot-block boot-sub is-short"></div>
+
+          <div class="boot-grid">
+            <article class="boot-card">
+              <div class="boot-block boot-thumb"></div>
+              <div class="boot-card-body">
+                <div class="boot-block boot-card-title"></div>
+                <div class="boot-block boot-card-meta"></div>
+                <div class="boot-chips">
+                  <div class="boot-block boot-chip"></div>
+                  <div class="boot-block boot-chip"></div>
+                </div>
+              </div>
+            </article>
+            <article class="boot-card">
+              <div class="boot-block boot-thumb"></div>
+              <div class="boot-card-body">
+                <div class="boot-block boot-card-title"></div>
+                <div class="boot-block boot-card-meta"></div>
+                <div class="boot-chips">
+                  <div class="boot-block boot-chip"></div>
+                  <div class="boot-block boot-chip"></div>
+                </div>
+              </div>
+            </article>
+            <article class="boot-card">
+              <div class="boot-block boot-thumb"></div>
+              <div class="boot-card-body">
+                <div class="boot-block boot-card-title"></div>
+                <div class="boot-block boot-card-meta"></div>
+                <div class="boot-chips">
+                  <div class="boot-block boot-chip"></div>
+                  <div class="boot-block boot-chip"></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </main>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

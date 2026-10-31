@@ -21,10 +21,10 @@ const year = new Date().getFullYear()
 const links = [
   { label: 'Home', to: '/', match: (path) => path === '/' },
   { label: 'Properties', to: '/properties', match: (path) => path.startsWith('/properties') },
-  { label: 'My Requests', to: '/my-requests', match: (path) => path.startsWith('/my-requests') || path.startsWith('/requests/') || path === '/new-request' },
-  { label: 'Payments', to: '/my-payments', match: (path) => path === '/my-payments' || path === '/pay' },
-  { label: 'My Lease', to: '/my-lease', match: (path) => path === '/my-lease' },
   { label: 'My Unit', to: '/my-unit', match: (path) => path === '/my-unit' },
+  { label: 'My Lease', to: '/my-lease', match: (path) => path === '/my-lease' },
+  { label: 'Payments', to: '/my-payments', match: (path) => path === '/my-payments' || path === '/pay' },
+  { label: 'My Requests', to: '/my-requests', match: (path) => path.startsWith('/my-requests') || path.startsWith('/requests/') || path === '/new-request' },
   { label: 'Support', to: '/support', match: (path) => path === '/support' },
 ]
 
@@ -90,25 +90,25 @@ onBeforeUnmount(() => {
       Skip to content
     </a>
     <header
-      class="sticky top-0 z-30 border-b border-rule bg-surface/95 backdrop-blur transition-shadow"
-      :class="scrolled ? 'shadow-e1' : ''"
+      class="sticky top-0 z-30 border-b bg-surface/80 backdrop-blur-xl transition"
+      :class="scrolled ? 'border-rule shadow-e1' : 'border-transparent'"
     >
-      <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6 lg:px-8">
+      <div class="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 sm:h-20 sm:gap-5 sm:px-6 lg:px-8">
         <RouterLink to="/" class="flex shrink-0 items-center gap-3" aria-label="Tenure home">
-          <span class="grid h-10 w-10 place-items-center rounded-lg bg-navy-800 font-mono text-sm font-bold text-white">T</span>
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-navy-800 font-mono text-[13px] font-bold text-white shadow-e1">T</span>
           <span class="leading-tight">
-            <span class="block font-mono text-[10px] font-bold tracking-[0.3em] text-ink">TENURE</span>
-            <span class="block text-[11.5px] text-ink-3">Resident portal</span>
+            <span class="block font-mono text-[10px] font-bold tracking-[0.32em] text-ink">TENURE</span>
+            <span class="block text-[11px] text-ink-3">Resident portal</span>
           </span>
         </RouterLink>
 
-        <nav class="ml-6 hidden items-center gap-0.5 lg:flex bg-sky-100/50 p-2 rounded-3xl " aria-label="Primary">
+        <nav class="ml-2 hidden items-center gap-0.5 rounded-full border border-rule bg-alt/70 p-1 lg:flex" aria-label="Primary">
           <RouterLink
             v-for="link in links"
             :key="link.to"
             :to="link.to"
-            class="rounded-2xl px-2.5 py-2 text-[12.5px] font-medium transition"
-            :class="isActive(link) ? 'bg-navy-100 font-semibold text-navy-800' : 'text-black hover:bg-alt hover:text-ink'"
+            class="rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors"
+            :class="isActive(link) ? 'bg-surface font-semibold text-navy-800 shadow-e1' : 'text-ink-2 hover:bg-surface/60 hover:text-ink'"
             :aria-current="isActive(link) ? 'page' : undefined"
           >
             {{ link.label }}
@@ -121,17 +121,17 @@ onBeforeUnmount(() => {
           </RouterLink>
         </nav>
 
-        <div class="ml-auto flex items-center gap-2 xl:ml-2">
+        <div class="ml-auto flex items-center gap-1.5">
           <RouterLink
             v-if="store.signedIn"
             to="/notifications"
-            class="relative hidden h-10 w-10 place-items-center bg-surface text-ink-2 transition hover:text-ink sm:grid"
+            class="relative hidden h-10 w-10 place-items-center rounded-full text-ink-2 transition-colors hover:bg-alt hover:text-ink sm:grid"
             :aria-label="store.unreadCount ? `Notifications, ${store.unreadCount} unread` : 'Notifications'"
           >
             <Icon name="bell" :size="20" />
             <span
               v-if="store.unreadCount && preferences.notifications !== 'muted'"
-              class="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-signal px-1 font-mono text-[9px] font-semibold leading-none text-white"
+              class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-signal px-1 font-mono text-[9px] font-semibold leading-none text-white ring-2 ring-surface"
             >
               {{ store.unreadCount }}
             </span>
@@ -140,7 +140,7 @@ onBeforeUnmount(() => {
           <div v-if="store.signedIn" class="relative">
             <button
               type="button"
-              class="flex items-center rounded-full border border-navy-400 bg-surface transition"
+              class="flex items-center rounded-full border-2 border-rule-2 bg-surface p-1 transition-colors hover:border-navy-300 hover:shadow-e1"
               :aria-expanded="accountOpen"
               aria-haspopup="menu"
               aria-controls="account-menu"
@@ -196,7 +196,7 @@ onBeforeUnmount(() => {
 
           <button
             type="button"
-            class="grid h-10 w-10 place-items-center rounded-btn border border-rule-2 bg-surface text-ink-2 transition hover:border-navy-300 hover:bg-navy-50 hover:text-ink lg:hidden"
+            class="grid h-10 w-10 place-items-center rounded-full border border-rule-2 bg-surface text-ink-2 transition-colors hover:border-navy-300 hover:bg-alt hover:text-ink lg:hidden"
             :aria-expanded="menuOpen"
             aria-controls="customer-menu"
             aria-label="Open menu"
@@ -291,25 +291,25 @@ onBeforeUnmount(() => {
 
     <footer class="border-t border-rule bg-alt">
       <div class="bg-navy-900">
-        <div class="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-          <div>
-            <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-white/40">Need a hand?</p>
-            <p class="mt-1 text-lg font-semibold tracking-[-0.02em] text-white">Rent, repairs or paperwork — we're here.</p>
-            <p class="mt-1 text-[12.5px] leading-relaxed text-white/60">
+        <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-10 lg:px-8 lg:py-12">
+          <div class="max-w-xl">
+            <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.2em] text-white/40">Need a hand?</p>
+            <p class="mt-2 text-xl font-semibold leading-snug tracking-[-0.02em] text-white sm:text-2xl">Rent, repairs or paperwork — we're here.</p>
+            <p class="mt-2 text-[12.5px] leading-relaxed text-white/55">
               We reply within {{ org.reply }}. For emergencies call
-              <a :href="`tel:${org.emergency.replace(/\s/g, '')}`" class="font-semibold text-white underline decoration-white/30 underline-offset-2 hover:decoration-white">{{ org.emergency }}</a>.
+              <a :href="`tel:${org.emergency.replace(/\s/g, '')}`" class="font-semibold text-white underline decoration-white/25 underline-offset-2 transition-colors hover:decoration-white">{{ org.emergency }}</a>.
             </p>
           </div>
           <div class="flex shrink-0 flex-wrap items-center gap-2">
             <RouterLink
               to="/new-request"
-              class="inline-flex h-10 items-center gap-2 rounded-btn bg-white px-4 text-[12.5px] font-semibold text-navy-900 transition hover:bg-white/90"
+              class="inline-flex h-10 items-center gap-2 rounded-btn bg-white px-4 text-[12.5px] font-semibold text-navy-900 shadow-e1 transition-colors hover:bg-white/90"
             >
               <Icon name="wrench" :size="15" /> Report a repair
             </RouterLink>
             <RouterLink
               to="/support"
-              class="inline-flex h-10 items-center gap-2 rounded-btn border border-white/25 px-4 text-[12.5px] font-semibold text-white transition hover:bg-white/10"
+              class="inline-flex h-10 items-center gap-2 rounded-btn border border-white/20 px-4 text-[12.5px] font-semibold text-white transition-colors hover:border-white/40 hover:bg-white/10"
             >
               Contact support
             </RouterLink>
@@ -317,64 +317,69 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div class="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
-        <div>
+      <div class="mx-auto grid w-full max-w-7xl gap-x-8 gap-y-10 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-[1.5fr_1fr_1fr_1.15fr] lg:px-8 lg:py-14">
+        <div class="sm:col-span-2 lg:col-span-1">
           <RouterLink to="/" class="flex items-center gap-2.5">
-            <span class="grid h-9 w-9 place-items-center rounded-lg bg-navy-800 font-mono text-[13px] font-bold text-white">T</span>
+            <span class="grid h-9 w-9 place-items-center rounded-xl bg-navy-800 font-mono text-[13px] font-bold text-white shadow-e1">T</span>
             <span class="leading-tight">
-              <span class="block font-mono text-[10px] font-bold tracking-[0.3em] text-ink">TENURE</span>
+              <span class="block font-mono text-[10px] font-bold tracking-[0.32em] text-ink">TENURE</span>
               <span class="block text-[11px] text-ink-3">{{ org.name }}</span>
             </span>
           </RouterLink>
-          <p class="mt-4 max-w-[30ch] text-[12.5px] leading-relaxed text-ink-2">
+          <p class="mt-5 max-w-[32ch] text-[13px] leading-relaxed text-ink-2">
             Rent, repairs, leases and documents in one place for every home managed by {{ org.name }}.
           </p>
           <p class="mt-4 font-mono text-[10.5px] leading-relaxed text-ink-3">{{ org.address }}</p>
         </div>
 
         <div>
-          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-ink-3">Explore</p>
-          <ul class="mt-3 space-y-2">
-            <li><RouterLink to="/properties" class="text-[12.5px] font-medium text-ink-2 transition hover:text-navy-800">Properties</RouterLink></li>
-            <li><RouterLink to="/support" class="text-[12.5px] font-medium text-ink-2 transition hover:text-navy-800">Support</RouterLink></li>
-            <li><RouterLink to="/new-request" class="text-[12.5px] font-medium text-ink-2 transition hover:text-navy-800">Report a repair</RouterLink></li>
+          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.18em] text-ink-3">Explore</p>
+          <ul class="mt-4 space-y-2.5">
+            <li><RouterLink to="/properties" class="text-[13px] font-medium text-ink-2 transition-colors hover:text-navy-800">Properties</RouterLink></li>
+            <li><RouterLink to="/support" class="text-[13px] font-medium text-ink-2 transition-colors hover:text-navy-800">Support</RouterLink></li>
+            <li><RouterLink to="/new-request" class="text-[13px] font-medium text-ink-2 transition-colors hover:text-navy-800">Report a repair</RouterLink></li>
           </ul>
         </div>
 
         <div>
-          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-ink-3">Your tenancy</p>
-          <ul class="mt-3 space-y-2">
-            <li><RouterLink to="/my-requests" class="text-[12.5px] font-medium text-ink-2 transition hover:text-navy-800">My requests</RouterLink></li>
-            <li><RouterLink to="/my-payments" class="text-[12.5px] font-medium text-ink-2 transition hover:text-navy-800">My payments</RouterLink></li>
-            <li><RouterLink to="/my-lease" class="text-[12.5px] font-medium text-ink-2 transition hover:text-navy-800">My lease</RouterLink></li>
-            <li><RouterLink to="/my-unit" class="text-[12.5px] font-medium text-ink-2 transition hover:text-navy-800">My unit</RouterLink></li>
+          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.18em] text-ink-3">Your tenancy</p>
+          <ul class="mt-4 space-y-2.5">
+            <li><RouterLink to="/my-requests" class="text-[13px] font-medium text-ink-2 transition-colors hover:text-navy-800">My requests</RouterLink></li>
+            <li><RouterLink to="/my-payments" class="text-[13px] font-medium text-ink-2 transition-colors hover:text-navy-800">My payments</RouterLink></li>
+            <li><RouterLink to="/my-lease" class="text-[13px] font-medium text-ink-2 transition-colors hover:text-navy-800">My lease</RouterLink></li>
+            <li><RouterLink to="/my-unit" class="text-[13px] font-medium text-ink-2 transition-colors hover:text-navy-800">My unit</RouterLink></li>
           </ul>
         </div>
 
         <div>
-          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-ink-3">Contact</p>
-          <ul class="mt-3 space-y-2 text-[12.5px] font-medium text-ink-2">
-            <li><a :href="org.phoneHref" class="transition hover:text-navy-800">{{ org.phone }}</a></li>
-            <li><a :href="`mailto:${org.email}`" class="transition hover:text-navy-800">{{ org.email }}</a></li>
-            <li class="text-ink-3">{{ org.hours }}</li>
+          <p class="font-mono text-[9.5px] font-semibold uppercase tracking-[0.18em] text-ink-3">Contact</p>
+          <ul class="mt-4 space-y-2.5 text-[13px] font-medium text-ink-2">
+            <li><a :href="org.phoneHref" class="transition-colors hover:text-navy-800">{{ org.phone }}</a></li>
+            <li><a :href="`mailto:${org.email}`" class="transition-colors hover:text-navy-800">{{ org.email }}</a></li>
+            <li class="font-normal text-ink-3">{{ org.hours }}</li>
           </ul>
-          <div class="mt-4 rounded-card border border-signal-bd bg-signal-bg px-3 py-2.5">
-            <p class="font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-signal">Out of hours</p>
-            <p class="mt-0.5 text-[12px] leading-relaxed text-ink-2">
+          <div class="mt-5 rounded-card border border-signal-bd bg-signal-bg px-3.5 py-3">
+            <p class="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-signal">Out of hours</p>
+            <p class="mt-1 text-[12px] leading-relaxed text-ink-2">
               Emergencies only:<br />
-              <a :href="`tel:${org.emergency.replace(/\s/g, '')}`" class="font-semibold text-ink transition hover:text-signal">{{ org.emergency }}</a>
+              <a :href="`tel:${org.emergency.replace(/\s/g, '')}`" class="font-semibold text-ink underline decoration-signal/30 underline-offset-2 transition-colors hover:text-signal hover:decoration-signal">{{ org.emergency }}</a>
             </p>
           </div>
         </div>
       </div>
 
-      <div class="border-t border-rule">
-        <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-5 font-mono text-[10px] text-ink-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p>© {{ year }} TENURE · {{ org.name }}</p>
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <p>Prototype · figures are illustrative</p>
-            <button type="button" class="inline-flex items-center gap-1 font-mono text-[10px] text-ink-3 transition hover:text-navy-800" @click="backToTop">
-              Back to top <Icon name="chevron" :size="11" class="-rotate-90" />
+      <div class="border-t border-rule bg-alt">
+        <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <p class="font-mono text-[10px] text-ink-3">© {{ year }} TENURE · {{ org.name }}</p>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p class="font-mono text-[10px] text-ink-3">Prototype · figures are illustrative</p>
+            <button
+              type="button"
+              class="group inline-flex items-center gap-1.5 rounded-full border border-rule-2 bg-surface px-3 py-1.5 font-mono text-[10px] font-semibold text-ink-2 transition-colors hover:border-navy-300 hover:text-navy-800"
+              @click="backToTop"
+            >
+              Back to top
+              <Icon name="chevron" :size="11" class="-rotate-90 transition-transform group-hover:-translate-y-0.5" />
             </button>
           </div>
         </div>

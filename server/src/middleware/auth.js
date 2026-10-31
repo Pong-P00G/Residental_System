@@ -1,46 +1,54 @@
-import admin from "../config/firebase.js";
-import User from "../models/User.js";
+import { getFirebaseAuth } from '../config/firebase.js';
+import * as authService from '../services/authService.js';
+import ApiError from '../utils/apiError.js';
 
-export const verifyFirebaseToken = async (req, res, next) => {
-    const authHeader = req.headers.authorization;
+const bearerToken = (req) => {
+    const header = req.headers.authorization || '';
+    const [scheme, token] = header.split(' ');
+    return scheme?.toLowerCase() === 'bearer' && token ? token.trim() : null;
+};
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res
-        .status(401)
-        .json({
-            message: "Unauthorized: Missing or invalid Authorization header",
-        });
-    }
-
-    const idToken = authHeader.split("Bearer ")[1];
-
+const verify = async (token) => {
     try {
-        // 1. Validate the cryptographic signature with Firebase
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        return await getFirebaseAuth().verifyIdToken(token, true);
+    } catch (error) {
+        throw new ApiError(401, 'Invalid or expired authentication token');
+    }
+};
 
-        // 2. Fetch or sync the user in MongoDB
-        //    Upsert ensures the user document exists on first login
-        let user = await User.findOne({ firebaseUid: decodedToken.uid });
+/**
+ * Verify the Firebase ID token, sync the MongoDB user and attach it to the request.
+ * Sets req.firebaseUser (decoded token) and req.user (Mongoose document).
+ */
+export const authenticate = async (req, res, next) => {
+    try {
+        const idToken = bearerToken(req);
+        if (!idToken) throw new ApiError(401, 'Authentication token is required');
 
-        if (!user) {
-        user = await User.create({
-            firebaseUid: decodedToken.uid,
-            email: decodedToken.email || null,
-            phoneNumber: decodedToken.phone_number || null,
-            authProvider: decodedToken.firebase.sign_in_provider,
-            displayName: decodedToken.name || "",
-            photoURL: decodedToken.picture || "",
-        });
-        }
-
-        // 3. Attach identity info to Express Request context
-        req.user = user;
+        const decodedToken = await verify(idToken);
         req.firebaseUser = decodedToken;
+        req.user = await authService.syncUser(decodedToken, { ip: req.ip });
+
         next();
     } catch (error) {
-        console.error("Token verification error:", error.code, error.message);
-        return res
-        .status(401)
-        .json({ message: "Unauthorized: Invalid or expired token" });
+        next(error);
     }
+};
+
+/**
+ * Attach the user when a valid token is present, but never reject the request.
+ */
+export const optionalAuth = async (req, res, next) => {
+    try {
+        const idToken = bearerToken(req);
+        if (!idToken) return next();
+
+        const decodedToken = await verify(idToken);
+        req.firebaseUser = decodedToken;
+        req.user = await authService.syncUser(decodedToken, { ip: req.ip });
+    } catch (error) {
+        req.user = undefined;
+    }
+
+    next();
 };

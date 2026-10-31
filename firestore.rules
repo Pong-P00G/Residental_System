@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Notifications live in a per-user subcollection so reads can be scoped to
+    // the signed-in user. Writes are performed exclusively by the API using the
+    // Admin SDK, which bypasses these rules, so clients are read-only here and
+    // mark notifications as read through PATCH /api/v1/notifications/:id/read.
+    match /users/{userId}/notifications/{notificationId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    // Nothing else in Firestore is exposed to clients.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

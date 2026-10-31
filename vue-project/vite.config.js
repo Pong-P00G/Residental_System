@@ -14,6 +14,13 @@ export default defineConfig({
   ],
   server: {
     port:3000,
+    // Dev-only proxy so the browser talks to the same origin as the API.
+    proxy: {
+      '/api': {
+        target: process.env.VITE_PROXY_TARGET || 'http://localhost:5001',
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {

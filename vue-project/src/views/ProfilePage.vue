@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { leaseById, money, org, resident, unitById } from '@/data/app'
 import { authErrorMessage } from '@/lib/firebase'
 import { preferences, setPreference } from '@/lib/preferences'
@@ -55,8 +55,39 @@ const preferenceList = [
   { key: 'buildingNotices', title: 'Building notices', meta: 'Water shut-offs, inspections, works' },
 ]
 
-function saveDetails() {
-  store.updateProfile({ name: name.value, email: email.value, phone: phone.value })
+const savingDetails = ref(false)
+const detailsError = ref('')
+const detailsErrors = ref({})
+
+const DETAIL_FIELDS = ['name', 'email', 'phone']
+
+// Editing a field clears the server's complaints so they don't linger while retyping.
+watch([name, email, phone], () => {
+  detailsError.value = ''
+  detailsErrors.value = {}
+})
+
+async function saveDetails() {
+  if (savingDetails.value) return
+  savingDetails.value = true
+  detailsErrors.value = {}
+  detailsError.value = ''
+
+  try {
+    const result = await store.updateProfile({ name: name.value, email: email.value, phone: phone.value })
+    if (result.ok) return
+
+    detailsErrors.value = result.errors || {}
+    // Field messages show under their own input; only unmapped ones go in the form alert.
+    const unmapped = Object.keys(detailsErrors.value).filter((field) => !DETAIL_FIELDS.includes(field))
+    if (unmapped.length) {
+      detailsError.value = unmapped.map((field) => detailsErrors.value[field]).join(' ')
+    } else if (!Object.keys(detailsErrors.value).length) {
+      detailsError.value = result.message || 'Your details could not be saved.'
+    }
+  } finally {
+    savingDetails.value = false
+  }
 }
 
 function savePrefs() {
@@ -224,15 +255,32 @@ function confirmWithProvider(name) {
           </div>
 
           <form class="mt-5 grid gap-3 sm:grid-cols-2" @submit.prevent="saveDetails">
-            <Field v-model="name" label="Full name" autocomplete="name" />
-            <Field v-model="phone" label="Mobile" type="tel" autocomplete="tel" />
+            <Field v-model="name" label="Full name" autocomplete="name" :error="detailsErrors.name" />
+            <Field
+              v-model="phone"
+              label="Mobile"
+              type="tel"
+              autocomplete="tel"
+              hint="Include the country code, e.g. +44 7700 900412."
+              :error="detailsErrors.phone"
+            />
             <div class="sm:col-span-2">
-              <Field v-model="email" label="Email" type="email" autocomplete="email" />
+              <Field v-model="email" label="Email" type="email" autocomplete="email" :error="detailsErrors.email" />
             </div>
-            <div class="flex items-center gap-2 sm:col-span-2">
-              <Btn type="submit" size="sm">Save details</Btn>
+            <div class="flex flex-wrap items-center gap-2 sm:col-span-2">
+              <Btn type="submit" size="sm" :disabled="savingDetails">
+                {{ savingDetails ? 'Saving…' : 'Save details' }}
+              </Btn>
               <span class="text-[11px] text-ink-3">Your tenancy reference stays the same.</span>
             </div>
+            <p
+              v-if="detailsError"
+              class="flex items-start gap-1.5 text-[11.5px] leading-snug text-signal sm:col-span-2"
+              role="alert"
+            >
+              <Icon name="alert" :size="13" class="mt-px shrink-0" />
+              {{ detailsError }}
+            </p>
           </form>
         </section>
 
@@ -256,7 +304,7 @@ function confirmWithProvider(name) {
                 :aria-label="preference.title"
                 @click="prefs[preference.key] = !prefs[preference.key]"
               >
-                <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all" :class="prefs[preference.key] ? 'left-[22px]' : 'left-0.5'"></span>
+                <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all" :class="prefs[preference.key] ? 'left-6' : 'left-0.5'"></span>
               </button>
             </div>
           </div>
@@ -265,7 +313,7 @@ function confirmWithProvider(name) {
 
         <section id="preferences" class="rounded-card border border-rule bg-surface p-5 shadow-e1 scroll-mt-28">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 class="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">{{ t('preferences.title') }}</h2>
+            <h2 class="font-khmer text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">{{ t('preferences.title') }}</h2>
             <Chip tone="neutral">{{ preferences.theme }} · {{ preferences.language === 'km' ? 'ខ្មែរ' : 'EN' }}</Chip>
           </div>
           <p class="mt-1.5 text-[11.5px] leading-relaxed text-ink-2">{{ t('preferences.subtitle') }}</p>

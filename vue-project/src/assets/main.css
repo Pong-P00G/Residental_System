@@ -5,6 +5,7 @@
 @theme {
   --font-sans: "Archivo", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "Hiragino Sans", "Yu Gothic", ui-monospace, monospace;
+  --font-khmer: "Khmer", system-ui, sans-serif;
 
   --color-board: #e3e7ec;
   --color-surface: #fcfdfe;
@@ -110,7 +111,7 @@
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     /* Keep stray oversized elements from producing a sideways page.
-       `clip` (not `hidden`) avoids turning the page into a scroll
+      `clip` (not `hidden`) avoids turning the page into a scroll
        container, so position: sticky keeps working. */
     overflow-x: hidden;
     overflow-x: clip;

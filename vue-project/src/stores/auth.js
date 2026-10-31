@@ -17,6 +17,7 @@ import {
   updateProfile,
 } from '../lib/firebase'
 import { useAppStore } from './app'
+import { api } from '../lib/api'
 
 function describeUser(user) {
   if (!user) return null
@@ -38,6 +39,9 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     ready: false,
     user: null,
+    // Identity and permissions resolved by the API for this Firebase session.
+    serverUser: null,
+    permissions: null,
   }),
   getters: {
     isSignedIn: (state) => Boolean(state.user),
@@ -65,6 +69,8 @@ export const useAuthStore = defineStore('auth', {
             this.user = describeUser(user)
             const app = useAppStore()
             if (user && !app.signedIn) this.openSession(user)
+            // Exchange the Firebase session for the API user without blocking mount.
+            if (user) this.syncServerSession(user)
             done()
           },
           () => done(),
@@ -81,6 +87,7 @@ export const useAuthStore = defineStore('auth', {
       if (!auth) throw new Error('Authentication is not configured.')
       const credential = await signInWithEmailAndPassword(auth, email, password)
       this.openSession(credential.user)
+      this.syncServerSession(credential.user)
       useAppStore().toast('Signed in')
       return credential.user
     },
@@ -89,6 +96,7 @@ export const useAuthStore = defineStore('auth', {
       const credential = await createUserWithEmailAndPassword(auth, email, password)
       if (name) await updateProfile(credential.user, { displayName: name })
       this.openSession(auth.currentUser || credential.user)
+      this.syncServerSession(auth.currentUser || credential.user)
       useAppStore().toast('Account created · welcome home')
       return credential.user
     },
@@ -98,6 +106,7 @@ export const useAuthStore = defineStore('auth', {
       if (name !== 'facebook') provider.setCustomParameters({ prompt: 'select_account' })
       const credential = await signInWithPopup(auth, provider)
       this.openSession(credential.user)
+      this.syncServerSession(credential.user)
       useAppStore().toast(`Signed in with ${providerLabel(name)}`)
       return credential.user
     },
@@ -132,8 +141,42 @@ export const useAuthStore = defineStore('auth', {
       await sendPasswordResetEmail(auth, email)
       useAppStore().toast('Reset link sent · check your inbox')
     },
+    // Adopt the API's user + permissions, falling back to the demo session when
+    // the backend is unreachable or unconfigured.
+    async syncServerSession(firebaseUser) {
+      if (!firebaseUser) return null
+
+      try {
+        const session = await api.auth.createSession()
+        this.serverUser = session?.user ?? null
+        this.permissions = session?.permissions ?? null
+
+        if (this.serverUser) {
+          useAppStore().applyServerUser({
+            role: this.serverUser.role,
+            name: this.serverUser.name,
+            email: this.serverUser.email,
+          })
+        }
+
+        return session
+      } catch {
+        // Offline, backend down, or Firebase Admin not configured.
+        return null
+      }
+    },
+    async endServerSession() {
+      try {
+        await api.auth.logout()
+      } catch {
+        // Best effort: sign-out must never be blocked by the API.
+      }
+      this.serverUser = null
+      this.permissions = null
+    },
     async signOut() {
       if (auth?.currentUser) {
+        await this.endServerSession()
         try {
           await firebaseSignOut(auth)
         } catch {

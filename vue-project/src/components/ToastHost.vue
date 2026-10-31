@@ -6,7 +6,7 @@ const store = useAppStore()
 </script>
 
 <template>
-  <div class="pointer-events-none fixed inset-x-0 top-4 z-60 flex flex-col items-center gap-2 px-4">
+  <div class="pointer-events-none fixed inset-x-0 top-6 z-60 flex flex-col items-center gap-2 px-4">
     <div
       v-for="toast in store.toasts"
       :key="toast.id"

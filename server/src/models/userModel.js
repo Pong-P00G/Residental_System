@@ -1,11 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
-
-const PROVIDERS = ['password', 'google.com', 'facebook.com', 'phone'];
 
 const userSchema = new Schema(
     {
-        firebaseUid: { type: String, required: true, unique: true },
+        // Firebase identity — the source of truth for authentication
+        firebaseUid: { type: String, required: true, unique: true, trim: true },
 
         // Contact identifiers
         name: { type: String, required: true, trim: true, maxlength: 80 },
@@ -17,17 +15,27 @@ const userSchema = new Schema(
             trim: true,
             match: [/^\S+@\S+\.\S+$/, 'Invalid email address'],
         },
-        isEmailVerified: { type: Boolean, default: false },
-        phoneNumber: { type: String, trim: true, unique: true, sparse: true },
-        isPhoneVerified: { type: Boolean, default: false },
+        phoneNumber: {
+            type: String,
+            trim: true,
+            unique: true,
+            sparse: true, // unique only when present, so users without a phone can coexist
+            match: [/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format (E.164 required)'],
+        },
+        photoURL: { type: String, trim: true, default: '' },
+        emailVerified: { type: Boolean, default: false },
+        phoneVerified: { type: Boolean, default: false },
 
-        // Auth provider linked
-        provider: { type: String, required: true, enum: PROVIDERS },
+        // Auth providers (Firebase can link multiple)
+        providers: [{
+            type: String,
+            enum: ['password', 'google.com', 'facebook.com', 'apple.com', 'phone'],
+        }],
 
         // RBAC & access control
         role: {
             type: String,
-            enum: ['user', 'manager', 'admin'],
+            enum: ['user', 'owner', 'admin'],
             default: 'user',
             index: true,
         },
@@ -38,53 +46,113 @@ const userSchema = new Schema(
             index: true,
         },
 
-        // Soft delete timestamp
-        deletedAt: { type: Date, default: null },
+        // Soft delete
+        deletedAt: { type: Date, default: null, index: true },
 
-        // Optional: Firebase handles credentials, so only keep this if you need it
-        password: { type: String, minlength: 8, select: false },
+        // Property access (quick reference, mirrors property_members junction)
+        propertyIds: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Property',
+        }],
 
-        avatar: { type: String },
+        // Profile
         bio: { type: String, maxlength: 500 },
+
+        // Preferences
         preferences: {
-            theme: {
-                type: String,
-                enum: ['light', 'dark', 'system'],
-                default: 'system',
+            theme: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
+            currency: { type: String, default: 'USD' },
+            language: { type: String, default: 'en' },
+            timezone: { type: String, default: 'UTC' },
+            notifications: {
+                push: { type: Boolean, default: true },
+                email: { type: Boolean, default: true },
+                sms: { type: Boolean, default: false },
+                requestUpdates: { type: Boolean, default: true },
+                paymentReminders: { type: Boolean, default: true },
+                announcements: { type: Boolean, default: true },
             },
         },
+
+        // Identity verification (KYC for compliance)
+        identityVerified: { type: Boolean, default: false },
+        identityDocUrl: { type: String, default: '' },
+
+        // Payment methods (tokenized — no raw card data)
+        paymentMethods: [{
+            provider: { type: String, enum: ['qr', 'cash', 'card', 'bank_transfer'] },
+            token: { type: String },
+            last4: { type: String },
+            brand: { type: String },
+            expiryMonth: { type: String },
+            expiryYear: { type: String },
+            isDefault: { type: Boolean, default: false },
+            addedAt: { type: Date, default: Date.now },
+        }],
+
+        // Onboarding
+        onboardingStatus: {
+            type: String,
+            enum: ['pending', 'profile_complete', 'property_assigned', 'completed'],
+            default: 'pending',
+        },
+
+        // Security tracking
+        lastLoginAt: { type: Date },
+        lastLoginIp: { type: String },
+        loginCount: { type: Number, default: 0, min: 0 },
+        emailChangedAt: { type: Date },
     },
     {
         timestamps: true,
-        toObject: { virtuals: true },
         toJSON: {
             virtuals: true,
             transform: (_doc, ret) => {
-                delete ret.password;
                 delete ret.__v;
+                // Never expose stored payment provider tokens
+                ret.paymentMethods = (ret.paymentMethods || []).map(({ token, ...method }) => method);
                 return ret;
             },
         },
     }
 );
 
-userSchema.virtual('profile', {
-    ref: 'UserProfile',
-    localField: '_id',
-    foreignField: 'userId',
-    justOne: true,
+// Compound indexes (single-field unique indexes above cover id lookups)
+userSchema.index({ status: 1, role: 1 });
+userSchema.index({ createdAt: -1 });
+
+// Virtuals
+userSchema.virtual('isActive').get(function () {
+    return this.status === 'active' && !this.deletedAt;
 });
 
-// Hash password before saving (only if one is set and changed)
-userSchema.pre('save', async function () {
-    if (!this.password || !this.isModified('password')) return;
-    this.password = await bcrypt.hash(this.password, 12);
-});
+// Statics
+userSchema.statics.findByRole = function (role, limit = 50) {
+    return this.find({ role, status: 'active', deletedAt: null })
+        .sort({ createdAt: -1 })
+        .limit(limit);
+};
 
-// Compare candidate password with stored hash
-userSchema.methods.comparePassword = function (candidate) {
-    if (!this.password) return Promise.resolve(false);
-    return bcrypt.compare(candidate, this.password);
+userSchema.statics.findByFirebaseUid = function (firebaseUid) {
+    return this.findOne({ firebaseUid, deletedAt: null });
+};
+
+userSchema.statics.findActiveByEmail = function (email) {
+    return this.findOne({ email: String(email).toLowerCase(), deletedAt: null });
+};
+
+// Methods
+userSchema.methods.recordLogin = function (ipAddress) {
+    this.lastLoginAt = new Date();
+    this.lastLoginIp = ipAddress;
+    this.loginCount += 1;
+    return this.save({ validateBeforeSave: false });
+};
+
+userSchema.methods.softDelete = function () {
+    this.status = 'deactivated';
+    this.deletedAt = new Date();
+    return this.save({ validateBeforeSave: false });
 };
 
 export default mongoose.model('User', userSchema);

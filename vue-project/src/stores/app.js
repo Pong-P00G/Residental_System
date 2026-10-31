@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { api } from '@/lib/api'
 import {
   accounts,
   notifications as seedNotifications,
@@ -12,6 +13,21 @@ let requestCounter = 4900
 
 const SESSION_KEY = 'tenure.session.v1'
 const ROLES = ['resident', 'owner', 'admin']
+// The API uses user/owner/admin; the UI speaks resident/owner/admin.
+const ROLE_MAP = { user: 'resident', resident: 'resident', owner: 'owner', admin: 'admin' }
+
+// API field names → form field names, so a rejection lands on the right input.
+const FIELD_ALIASES = { phoneNumber: 'phone' }
+
+function fieldErrors(error) {
+  const details = Array.isArray(error?.details) ? error.details : []
+  const errors = {}
+  for (const { field, message } of details) {
+    const key = FIELD_ALIASES[field] || field
+    if (key && message && !errors[key]) errors[key] = message
+  }
+  return errors
+}
 
 function loadSession() {
   try {
@@ -87,6 +103,19 @@ export const useAppStore = defineStore('app', {
       this.profile = { ...accounts.resident, name: name || accounts.resident.name, email: email || '' }
       this.persistSession()
     },
+    // Adopt the role and profile the API resolved for this Firebase user.
+    applyServerUser({ role, name, email } = {}) {
+      const mapped = ROLE_MAP[role] || 'resident'
+      const account = accounts[mapped]
+      const nextName = name || this.session?.name || account.name
+      const nextEmail = email || this.session?.email || account.email || ''
+
+      this.signedIn = true
+      this.role = mapped
+      this.session = { ...account, name: nextName, email: nextEmail }
+      this.profile = { ...account, name: nextName, email: nextEmail }
+      this.persistSession()
+    },
     signIn(role = 'resident') {
       const next = ROLES.includes(role) ? role : 'resident'
       this.signedIn = true
@@ -111,10 +140,13 @@ export const useAppStore = defineStore('app', {
     markRead(id) {
       const notification = this.notificationList.find((item) => item.id === id)
       if (notification) notification.read = true
+      // Firestore holds the real feed; demo rows simply fail quietly.
+      api.notifications.markRead(id).catch(() => {})
     },
     markAllRead() {
       this.notificationList = this.notificationList.map((item) => ({ ...item, read: true }))
       this.toast('All notifications marked as read')
+      api.notifications.markAllRead().catch(() => {})
     },
     submitRequest({ title, category, urgency, description, photos = 0, unitId = 'u-4b' }) {
       const id = `RQ-${++requestCounter}`
@@ -196,7 +228,24 @@ export const useAppStore = defineStore('app', {
       request.steps = request.steps.map((step) => ({ ...step, state: 'done' }))
       this.toast(`${requestId} marked resolved`)
     },
-    updateProfile({ name, email, phone }) {
+    // Returns { ok, message, errors } so the caller can show a per-field error.
+    async updateProfile({ name, email, phone }) {
+      const body = { name, email }
+      // Only send the phone when it changed: the seeded demo number is not E.164
+      // and would otherwise reject an edit of any other field.
+      if (phone !== this.profile.phone) body.phoneNumber = phone || null
+
+      try {
+        await api.users.updateMe(body)
+      } catch (error) {
+        // 4xx means the server rejected what was typed — leave the stored profile
+        // untouched and hand the field messages back to the form.
+        if (error.status >= 400 && error.status < 500) {
+          return { ok: false, message: error.message, errors: fieldErrors(error) }
+        }
+        // Offline or 5xx: keep the edit locally; the connection banner reports it.
+      }
+
       this.profile.name = name
       this.profile.email = email
       this.profile.phone = phone
@@ -204,6 +253,7 @@ export const useAppStore = defineStore('app', {
       this.session.email = email
       this.persistSession()
       this.toast('Profile updated')
+      return { ok: true, message: '', errors: {} }
     },
   },
 })
