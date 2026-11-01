@@ -12,5 +12,5 @@ node_modules/
 
 
 #firebase
-firebase.json
-firestore.rules
+firebase.json/
+firestore.rules/
