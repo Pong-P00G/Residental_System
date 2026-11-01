@@ -9,3 +9,8 @@ serviceAccount*.json
 
 # Dependencies
 node_modules/
+
+
+#firebase
+firebase.json
+firestore.rules
