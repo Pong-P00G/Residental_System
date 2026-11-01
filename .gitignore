@@ -1,0 +1,11 @@
+# Environment / secrets (never commit)
+.env
+.env.*
+!.env.example
+
+# Service account keys
+serviceAccount*.json
+*service-account*.json
+
+# Dependencies
+node_modules/
